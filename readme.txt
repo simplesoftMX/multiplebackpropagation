@@ -43,3 +43,6 @@ are doing and I miss it in C# and java.
 The FlickerFreeDC class was based on Keith Rule class (don't know if it still overlap any code or
 how much it overlaps). If someone has the time to remake this class it would be nice, although this 
 application should be changed to take advantage of OpenGL or DirectX.
+
+NoelCtrls name obviously needs the name changed and the requirement of a license too. But for now 
+I'm just trying to make the changes necessary to place the code online.

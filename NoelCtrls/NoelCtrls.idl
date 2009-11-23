@@ -1,0 +1,189 @@
+/*
+	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
+
+	This file is part of Multiple Back-Propagation.
+
+    Multiple Back-Propagation is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/**
+ File     : Description of the NoelControls controls.
+ Date     : 4 of July of 1999
+ Reviewed : 2 of April of 2000
+*/
+#include <olectl.h>
+#include <idispids.h>
+
+[ uuid(DBB7B7DC-0F2C-4A1B-BC2F-FF0ED50595D9), version(1.0), helpfile("NoelCtrls.hlp"), helpstring("NoelCtrls ActiveX Control module"), control ]
+library NoelCtrlsLib {
+	importlib(STDOLE_TLB);
+	importlib(STDTYPE_TLB);
+
+	typedef enum {
+		[helpstring("Input file")]  InputFile,
+		[helpstring("Output file")] OutputFile,
+	} file_type;
+
+	// Primary dispatch interface for CFileBoxCtrl
+	[ uuid(D88F0104-321C-11D3-8706-E7549F7F7D3C), helpstring("Dispatch interface for FileBox Control"), hidden ]
+	dispinterface _DFileBox	{
+		properties:
+			//{{AFX_ODL_PROP(CFileBoxCtrl)
+			[id(DISPID_FONT), bindable] IFontDisp* Font;
+			[id(1)] file_type FileType;
+			[id(2)] BSTR Filter;
+			[id(3)] BSTR DefaultExt;
+			[id(4)] BSTR FileName;
+			[id(DISPID_ENABLED), bindable, requestedit] boolean Enabled;
+			//}}AFX_ODL_PROP
+
+		methods:
+			//{{AFX_ODL_METHOD(CFileBoxCtrl)
+			//}}AFX_ODL_METHOD
+
+			[id(DISPID_ABOUTBOX)] void AboutBox();
+	};
+
+	// Event dispatch interface for CFileBoxCtrl
+	[ uuid(D88F0105-321C-11D3-8706-E7549F7F7D3C), helpstring("Event interface for FileBox Control") ]
+	dispinterface _DFileBoxEvents {
+		properties:
+
+		methods:
+			//{{AFX_ODL_EVENT(CFileBoxCtrl)
+			[id(1)] void Change();
+			//}}AFX_ODL_EVENT
+	};
+
+	//  Class information for CFileBoxCtrl
+	[ uuid(D88F0106-321C-11D3-8706-E7549F7F7D3C), licensed, helpstring("FileBox Control"), control ]
+	coclass FileBox	{
+		[default] dispinterface _DFileBox;
+		[default, source] dispinterface _DFileBoxEvents;
+	};
+
+	// Primary dispatch interface for CientificNumberCtrl
+	[ uuid(D88F0107-321C-11D3-8706-E7549F7F7D3C), helpstring("Dispatch interface for CientificNumberBox Control"), hidden ]
+	dispinterface _DCientificNumber	{
+		properties:
+			//{{AFX_ODL_PROP(CientificNumberCtrl)
+			[id(DISPID_FONT), bindable] IFontDisp* Font;
+			[id(1)] double Value;
+			[id(DISPID_ENABLED), bindable, requestedit] boolean Enabled;
+			//}}AFX_ODL_PROP
+
+		methods:
+			//{{AFX_ODL_METHOD(CientificNumberCtrl)
+			//}}AFX_ODL_METHOD
+
+			[id(DISPID_ABOUTBOX)] void AboutBox();
+	};
+
+	// Event dispatch interface for CientificNumberCtrl
+	[ uuid(D88F0108-321C-11D3-8706-E7549F7F7D3C), helpstring("Event interface for CientificNumberBox Control") ]
+	dispinterface _DCientificNumberEvents {
+		properties:
+
+		methods:
+			//{{AFX_ODL_EVENT(CientificNumberCtrl)
+			[id(1)] void Change();
+			//}}AFX_ODL_EVENT
+	};
+
+	// Class information for CientificNumberCtrl
+	[ uuid(D88F0109-321C-11D3-8706-E7549F7F7D3C), licensed, helpstring("CientificNumberBox Control"), control ]
+	coclass CientificNumberBox	{
+		[default] dispinterface _DCientificNumber;
+		[default, source] dispinterface _DCientificNumberEvents;
+	};
+
+	// Primary dispatch interface for GraphicCtrl
+	[ uuid(D88F010A-321C-11D3-8706-E7549F7F7D3C), helpstring("Dispatch interface for Graphic Control"), hidden ]
+	dispinterface _DGraphic	{
+		properties:
+			//{{AFX_ODL_PROP(GraphicCtrl)
+			[id(DISPID_FONT), bindable] IFontDisp* Font;
+			[id(1)] boolean ConsiderPreviousScale;
+			//}}AFX_ODL_PROP
+
+		methods:
+			//{{AFX_ODL_METHOD(GraphicCtrl)
+			[id(2)] void Clear();
+			[id(3)] void SetScale(double min, double max);
+			[id(4)] void InsertLine(double* data, BSTR name);
+			[id(5)] void SetNumberPointsDraw(long number, double scale);
+			[id(6)] void Rescale(double originalMinimum, double originalMaximum, double actualMinimum, double actualMaximum);
+			[id(7)] void HorizontalAxe(BSTR name, double startValue, bool integerValues);
+			//}}AFX_ODL_METHOD
+
+			[id(DISPID_ABOUTBOX)] void AboutBox();
+	};
+
+	// Event dispatch interface for GraphicCtrl
+	[ uuid(D88F010B-321C-11D3-8706-E7549F7F7D3C), helpstring("Event interface for Graphic Control") ]
+	dispinterface _DGraphicEvents {
+		properties:
+
+		methods:
+			//{{AFX_ODL_EVENT(GraphicCtrl)
+			//}}AFX_ODL_EVENT
+	};
+
+	// Class information for GraphicCtrl
+	[ uuid(D88F010C-321C-11D3-8706-E7549F7F7D3C), licensed, helpstring("Graphic Control"), control ]
+	coclass Graphic	{
+		[default] dispinterface _DGraphic;
+		[default, source] dispinterface _DGraphic;
+	};
+
+	// Primary dispatch interface for UnsignedEditCtrl
+	[ uuid(D88F010D-321C-11D3-8706-E7549F7F7D3C), helpstring("Dispatch interface for UnsignedEdit Control"), hidden ]
+	dispinterface _DUnsignedEdit {
+		properties:
+			//{{AFX_ODL_PROP(UnsignedEditCtrl)
+			[id(DISPID_FONT), bindable] IFontDisp* Font;
+			[id(DISPID_ENABLED), bindable, requestedit] boolean Enabled;
+			[id(1)] long value;
+			[id(2)] long maximum;
+			//}}AFX_ODL_PROP
+
+		methods:
+			//{{AFX_ODL_METHOD(UnsignedEditCtrl)
+			//}}AFX_ODL_METHOD
+
+			[id(DISPID_ABOUTBOX)] void AboutBox();
+	};
+
+	// Event dispatch interface for UnsignedEditCtrl
+	[ uuid(D88F010E-321C-11D3-8706-E7549F7F7D3C), helpstring("Event interface for UnsignedEdit Control") ]
+	dispinterface _DUnsignedEditEvents {
+		properties:
+
+		methods:
+			//{{AFX_ODL_EVENT(UnsignedEditCtrl)
+			[id(1)] void Change();
+			//}}AFX_ODL_EVENT
+	};
+
+	// Class information for UnsignedEditCtrl
+	[ uuid(D88F010F-321C-11D3-8706-E7549F7F7D3C), licensed, helpstring("UnsignedEdit Control"), control ]
+	coclass UnsignedEdit {
+		[default] dispinterface _DUnsignedEdit;
+		[default, source] dispinterface _DUnsignedEditEvents;
+	};
+
+	//{{AFX_APPEND_ODL}}
+	//}}AFX_APPEND_ODL}}
+};

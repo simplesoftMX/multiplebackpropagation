@@ -1,0 +1,74 @@
+/*
+	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
+
+	This file is part of Multiple Back-Propagation.
+
+    Multiple Back-Propagation is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/**
+ File     : Description of the MBPTopology control.
+ Date     : 4 of September of 1999
+ Reviewed : 16 of May of 2008
+*/
+#include <olectl.h>
+#include <idispids.h>
+
+[ uuid(41547053-9FE0-4DFC-8C62-0BB3638A4E8C), version(1.0), helpstring("MBPTopology ActiveX Control module"), control ]
+library MBPTopologyLib {
+	importlib(STDOLE_TLB);
+
+	#include "../MBPCommon.h"
+
+	[ uuid(3FB794F2-6F17-4FEF-8F39-8487D1CC7BAA), helpstring("Dispatch interface for MBPTopology Control"), hidden ]
+	dispinterface _DMBPTopology	{
+		properties:
+			[id(DISPID_FONT), bindable] IFontDisp* Font;
+			[id(DISPID_ENABLED), bindable, requestedit] boolean Enabled;
+			[id(1)] network_type NetworkType;
+		methods:
+			[id(4), propget] activation_function ActivationFunction(long layer, long neuron, BOOL fromMainNetwork);
+			[id(4), propput] void ActivationFunction(long layer, long neuron, BOOL fromMainNetwork, activation_function value);
+			[id(5), propget] long Neurons(long layer, BOOL fromMainNetwork);
+			[id(6), propget] long Layers(BOOL fromMainNetwork);
+			[id(2)] void SetText(BSTR text, BOOL fromMainNetwork);
+			[id(7), propget] long NeuronsWithSelectiveActivation(long layer);
+			[id(7), propput] void NeuronsWithSelectiveActivation(long layer, long nNewValue);
+			[id(8), propget] double ActivationFunctionParameter(long layer, long neuron, BOOL fromMainNetwork);
+			[id(8), propput] void ActivationFunctionParameter(long layer, long neuron, BOOL fromMainNetwork, double newValue);
+			[id(3)] BSTR GetText(BOOL fromMainNetwork);
+			[id(9), propget] BOOL ConnectInputLayerWithOutputLayer(BOOL mainNetwork);
+			[id(9), propput] void ConnectInputLayerWithOutputLayer(BOOL mainNetwork, BOOL bNewValue);
+			[id(10)] void SetCudaRestrictions(LONG cudaRestrictions);
+	};
+
+	//  Event dispatch interface for CMBPTopologyCtrl
+
+	[ uuid(3F52F4E4-E248-45C8-A50A-B57CB05D720F), helpstring("Event interface for MBPTopology Control") ]
+	dispinterface _DMBPTopologyEvents {
+		properties:
+
+		methods:
+			[id(1)] void Change();
+	};
+
+	//  Class information for CMBPTopologyCtrl
+
+	[ uuid(E4FB26E6-CEFB-47C9-9250-7E45DC0C9E50), licensed, helpstring("MBPTopology Control"), control ]
+	coclass MBPTopology {
+		[default] dispinterface _DMBPTopology;
+		[default, source] dispinterface _DMBPTopologyEvents;
+	};
+};

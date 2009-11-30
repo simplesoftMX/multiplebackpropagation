@@ -1,0 +1,9 @@
+; NoelCtrls.def : Declares the module parameters.
+
+LIBRARY      "NoelCtrls.OCX"
+
+EXPORTS
+	DllCanUnloadNow     PRIVATE
+	DllGetClassObject   PRIVATE
+	DllRegisterServer   PRIVATE
+	DllUnregisterServer PRIVATE

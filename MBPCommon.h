@@ -19,15 +19,27 @@
 */
 
 /**
- Class    : EditUnsignedInt
- Purpose  : class for editing unsigned int numbers.
- Date     : 27 of September of 2000
- Reviewed : Never
- Version  : 1.0.0
+ File     : MBPCommon.h
+ Purpose  : Contains common types used both in MBPTopology project and MultipleBackPropagation project.
+ Author   : Noel de Jesus Mendonça Lopes
+ Date     : 18 of September of 1999
+ Reviewed : 16 of May of 2008
 */
-#include "../Common/Edit/EditUnsignedWnd.h"
+#ifndef MBPCommon_h
+#define MBPCommon_h
 
-class EditUnsignedInt : public EditUnsignedWnd {
-	private :
-		virtual void ValueChanged();
-};
+typedef enum {
+	Sigmoid  = 0,
+	Tanh     = 1,
+	Gaussian = 2,
+	Linear   = 3
+} activation_function;
+
+typedef enum {
+	BP    = 0,
+	MBPH  = 1,
+	MBP   = 2,	
+	MBPHO = 3
+} network_type;
+
+#endif

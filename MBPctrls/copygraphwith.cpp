@@ -18,8 +18,46 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// stdafx.cpp : source file that includes just the standard includes
-//  NoelCtrls.pch will be the pre-compiled header
-//  stdafx.obj will contain the pre-compiled type information
-
 #include "stdafx.h"
+#include "MBPctrls.h"
+#include "CopyGraphWith.h"
+#include "../Common/General/General.h"
+
+#ifdef _DEBUG
+	#define new DEBUG_NEW
+	#undef THIS_FILE
+	static char THIS_FILE[] = __FILE__;
+#endif
+
+void CopyGraphWithDialog::DoDataExchange(CDataExchange* pDX) {
+	CDialog::DoDataExchange(pDX);
+
+	DDX_Control(pDX, IDC_WIDTH, editWidth);
+	DDX_Control(pDX, IDC_HEIGHT, editHeight);
+}
+
+BEGIN_MESSAGE_MAP(CopyGraphWithDialog, CDialog)
+END_MESSAGE_MAP()
+
+void CopyGraphWithDialog::OnOK() {
+	CRect r(0, 0, editWidth.GetValue(), editHeight.GetValue());
+
+	if (!graphic->CopyGraphicToClipboard(r)) {
+		WarnUser(L"Could not copy graphic. Try specifing smaller dimensions for the graphic.");
+	} else {
+		CDialog::OnOK();
+	}
+}
+
+BOOL CopyGraphWithDialog::OnInitDialog() {
+	CRect r;
+
+	CDialog::OnInitDialog();
+
+	graphic->GetClientRect(r);
+	
+	editWidth.SetValue(r.Width());
+	editHeight.SetValue(r.Height());
+
+	return TRUE;  // return FALSE if you set the focus to a control
+}

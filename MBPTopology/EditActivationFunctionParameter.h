@@ -50,7 +50,7 @@
 #ifndef EditActivationFunctionParameter_h
 #define EditActivationFunctionParameter_h
 
-#include "../../Common/Edit/EditCientificNumber.h"
+#include "../Common/Edit/EditCientificNumber.h"
 
 class EditActivationFunctionParameter : public EditCientificNumber {
 	private :

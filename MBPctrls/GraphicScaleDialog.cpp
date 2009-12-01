@@ -19,7 +19,7 @@
 */
 
 #include "stdafx.h"
-#include "noelctrls.h"
+#include "MBPctrls.h"
 #include "GraphicScaleDialog.h"
 #include "GraphicCtrl.h"
 

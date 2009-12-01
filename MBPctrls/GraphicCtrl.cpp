@@ -44,7 +44,7 @@
                                       -------------
 */
 #include "stdafx.h"
-#include "NoelCtrls.h"
+#include "MBPctrls.h"
 #include "GraphicCtrl.h"
 #include "GraphicScaleDialog.h"
 #include "CopyGraphWith.h"
@@ -96,7 +96,7 @@ BEGIN_EVENT_MAP(GraphicCtrl, COleControl)
 	//}}AFX_EVENT_MAP
 END_EVENT_MAP()
 
-IMPLEMENT_OLECREATE_EX(GraphicCtrl, "NoelCtrls.Graphic", 0xd88f010C, 0x321c, 0x11d3, 0x87, 0x6, 0xe7, 0x54, 0x9f, 0x7f, 0x7d, 0x3c) // Initialize class factory and guid
+IMPLEMENT_OLECREATE_EX(GraphicCtrl, "MBPctrls.Graphic", 0xd88f010C, 0x321c, 0x11d3, 0x87, 0x6, 0xe7, 0x54, 0x9f, 0x7f, 0x7d, 0x3c) // Initialize class factory and guid
 
 IMPLEMENT_OLETYPELIB(GraphicCtrl, _tlid, _wVerMajor, _wVerMinor)
 
@@ -122,34 +122,6 @@ BOOL GraphicCtrl::GraphicCtrlFactory::UpdateRegistry(BOOL bRegister) {
 	} else {
 		return AfxOleUnregisterClass(m_clsid, m_lpszProgID);
 	}
-}
-
-static const TCHAR BASED_CODE _szLicFileName[] = _T("NoelCtrls.lic");
-
-static const WCHAR BASED_CODE _szLicString[] = L"Copyright (c) 1999-2008, Noel de Jesus Mendonça Lopes";
-
-/**
- Method  : BOOL GraphicCtrl::GraphicCtrlFactory::VerifyUserLicense()
- Purpose : Verify if the user as a licence to use
-           the Graphic control for designing.
- Version : 1.0.0
-*/
-BOOL GraphicCtrl::GraphicCtrlFactory::VerifyUserLicense() {
-	return AfxVerifyLicFile(AfxGetInstanceHandle(), _szLicFileName, _szLicString);
-}
-
-
-/**
- Method  : BOOL GraphicCtrl::GraphicCtrlFactory::GetLicenseKey(DWORD dwReserved,	BSTR FAR* pbstrKey)
- Purpose : Requests a unique license key from the control’s DLL 
-           and stores it in the BSTR pointed to by pbstrKey.
- Version : 1.0.0
-*/
-BOOL GraphicCtrl::GraphicCtrlFactory::GetLicenseKey(DWORD dwReserved,	BSTR FAR* pbstrKey) {
-	if (pbstrKey == NULL)	return FALSE;
-
-	*pbstrKey = SysAllocString(_szLicString);
-	return (*pbstrKey != NULL);
 }
 
 /**

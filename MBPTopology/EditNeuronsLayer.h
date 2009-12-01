@@ -48,7 +48,7 @@
 #ifndef EditNeuronsLayer_h
 #define EditNeuronsLayer_h
 
-#include "../../Common/Edit/Edit.h"
+#include "../Common/Edit/Edit.h"
 
 class EditNeuronsLayer : public Edit {
 	protected:

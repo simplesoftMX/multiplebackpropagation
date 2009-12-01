@@ -45,7 +45,7 @@
                                             -----------------
 */
 #include "stdafx.h"
-#include "../../Common/FlickerFreeDC/FlickerFreeDC.h"
+#include "../Common/FlickerFreeDC/FlickerFreeDC.h"
 #include "MBPTopology.h"
 #include "MBPTopologyCtrl.h"
 
@@ -108,33 +108,6 @@ BOOL CMBPTopologyCtrl::CMBPTopologyCtrlFactory::UpdateRegistry(BOOL bRegister) {
 	} else {
 		return AfxOleUnregisterClass(m_clsid, m_lpszProgID);
 	}
-}
-
-static const TCHAR BASED_CODE _szLicFileName[] = _T("MBPTopology.lic");
-
-static const WCHAR BASED_CODE _szLicString[] = L"Copyright (c) 1999-2008, Noel de Jesus Mendonça Lopes";
-
-/**
- Method  : BOOL CMBPTopologyCtrl::CMBPTopologyCtrlFactory::VerifyUserLicense()
- Purpose : Verify if the user as a licence to use the 
-           BPTopology control for designing.
- Version : 1.0.0
-*/
-BOOL CMBPTopologyCtrl::CMBPTopologyCtrlFactory::VerifyUserLicense() {
-	return AfxVerifyLicFile(AfxGetInstanceHandle(), _szLicFileName, _szLicString);
-}
-
-/**
- Method  : BOOL CMBPTopologyCtrl::CMBPTopologyCtrlFactory::GetLicenseKey(DWORD dwReserved,	BSTR FAR* pbstrKey)
- Purpose : Requests a unique license key from the control’s DLL 
-           and stores it in the BSTR pointed to by pbstrKey.
- Version : 1.0.0
-*/		
-BOOL CMBPTopologyCtrl::CMBPTopologyCtrlFactory::GetLicenseKey(DWORD dwReserved,	BSTR FAR* pbstrKey) {
-	if (pbstrKey == NULL)	return FALSE;
-
-	*pbstrKey = SysAllocString(_szLicString);
-	return (*pbstrKey != NULL);
 }
 
 /**

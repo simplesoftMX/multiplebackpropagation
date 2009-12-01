@@ -19,10 +19,10 @@
 */
 
 /**
- Class    : UnsignedEditCtrl
- Puropse  : Unsigned numbers edition control.
- Date     : 2 of April of 2000
- Reviewed : Never
+ Class    : CFileBoxCtrl
+ Puropse  : File edition control.
+ Date     : 4 of July of 1999
+ Reviewed : 27 of January of 2000
  Version  : 1.0.0
  Comments :
              ---------
@@ -40,97 +40,100 @@
                                   |   ---------------------------
                                   -->| OleControlWithChangeEvent |
                                       ---------------------------
-                                        |   ------------------
-                                        -->| UnsignedEditCtrl |
-                                            ------------------	
+                                        |   --------------
+                                        -->| CFileBoxCtrl |
+                                            --------------
 */
-#ifndef UnsignedEditCtrl_h
-#define UnsignedEditCtrl_h
+#ifndef CFileBoxCtrl_h
+#define CFileBoxCtrl_h
 
 #include "../Common/Pointers/Pointer.h"
-#include "../Common/OleControls/OleControlWithChangeEvent.h"
-#include "../Common/Edit/EditUnsignedWnd.h"
+#include "../Common/Edit/Edit.h"
+#include "OpenSaveDialogButton.h"
 
 #if _MSC_VER > 1000
 	#pragma once
 #endif
 
-class UnsignedEditCtrl : public OleControlWithChangeEvent {
-	DECLARE_DYNCREATE(UnsignedEditCtrl)
+class CFileBoxCtrl : public OleControlWithChangeEvent {
+	friend class OpenSaveDialogButton;
+
+	DECLARE_DYNCREATE(CFileBoxCtrl)
 	
 	private :
 		/**
-		 Attribute : long value
-		 Purpose   : Contains the value of the unsigned edit control.
+		 Attribute : Pointer<Edit> textBox
+		 Purpose   : Pointer to the text box that will contain the filename.
 		*/
-		long value;
+		Pointer<Edit> textBox;
 
 		/**
-		 Attribute : long maximum
-		 Purpose   : Contains the maximum value that the 
-		             unsigned edit control can have.
+		 Attribute : Pointer<OpenSaveDialogButton> button
+		 Purpose   : Pointer to the button that allows the user to open
+		             an Open/Save dialog in order to select a file.
 		*/
-		long maximum;
-
-		/**
-		 Attribute : Pointer<EditUnsignedWnd> unsignedWnd
-		 Purpose   : pointer to the unsigned window.
-		*/
-		Pointer<EditUnsignedWnd> unsignedWnd;
+		Pointer<OpenSaveDialogButton> button;
 
 	public :
 		/**
-		 Constructor : UnsignedEditCtrl()
-		 Purpose     : Initialize the control.
+		 Constructor : CFileBoxCtrl()
+		 Purpose     : Initialize the file box control.
 		*/
-		UnsignedEditCtrl();
+		CFileBoxCtrl();
 
-		//{{AFX_VIRTUAL(UnsignedEditCtrl)
+		enum file_type {
+			InputFile  = 0,
+			OutputFile = 1,
+		};
+
+	//{{AFX_VIRTUAL(CFileBoxCtrl)
 	public:
 		virtual void DoPropExchange(CPropExchange* pPX);
 		virtual void OnFontChanged();
-	virtual void OnEnabledChanged();
+	    virtual void OnEnabledChanged();
 	//}}AFX_VIRTUAL
 
 	private :
-		BEGIN_OLEFACTORY(UnsignedEditCtrl) // Class factory and guid
-			virtual BOOL VerifyUserLicense();
-			virtual BOOL GetLicenseKey(DWORD, BSTR FAR*);
-		END_OLEFACTORY(UnsignedEditCtrl)
+		DECLARE_OLECREATE_EX(CFileBoxCtrl) // Class factory and guid
+		DECLARE_OLETYPELIB(CFileBoxCtrl)  // GetTypeInfo
+		DECLARE_OLECTLTYPE(CFileBoxCtrl)	// Type name and misc status
 
-		DECLARE_OLETYPELIB(UnsignedEditCtrl) // GetTypeInfo
-		DECLARE_OLECTLTYPE(UnsignedEditCtrl)	// Type name and misc status
-
-		//{{AFX_MSG(UnsignedEditCtrl)
+		//{{AFX_MSG(CFileBoxCtrl)
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		afx_msg void OnSize(UINT nType, int cx, int cy);
 		afx_msg void OnSetFocus(CWnd* pOldWnd);
 		//}}AFX_MSG
 		DECLARE_MESSAGE_MAP()		
 
-		//{{AFX_DISPATCH(UnsignedEditCtrl)
-		afx_msg long GetValue();
-		afx_msg void SetValue(long nNewValue);
-		afx_msg long GetMaximum();
-		afx_msg void SetMaximum(long nNewValue);
+		//{{AFX_DISPATCH(CFileBoxCtrl)
+		short fileType;
+		afx_msg void OnFileTypeChanged();
+		CString filter;
+		afx_msg void OnFilterChanged();
+		CString defaultExt;
+		afx_msg void OnDefaultExtChanged();
+		afx_msg BSTR GetFileName();
+		afx_msg void SetFileName(LPCTSTR lpszNewValue);
 		//}}AFX_DISPATCH
 		DECLARE_DISPATCH_MAP()
 
 		/**
 		 Method  : afx_msg void AboutBox()
-		 Purpose : Show the about box of the UnsignedEdit control.
+		 Purpose : Show the about box of the CientificNumber control.
 		*/
 		afx_msg void AboutBox();
 
-		//{{AFX_EVENT(UnsignedEditCtrl)
+		//{{AFX_EVENT(CFileBoxCtrl)
 		//}}AFX_EVENT
 		DECLARE_EVENT_MAP()
 
 	public:
 		enum {
-			//{{AFX_DISP_ID(UnsignedEditCtrl)	
-			dispidValue = 1L,
-			dispidMaximum = 2L,
+			//{{AFX_DISP_ID(CFileBoxCtrl)
+			dispidFileType = 1L,
+			dispidFilter = 2L,
+			dispidDefaultExt = 3L,
+			dispidFileName = 4L,
 			//}}AFX_DISP_ID
 		};
 };

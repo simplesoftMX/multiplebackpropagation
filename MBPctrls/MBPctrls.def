@@ -1,6 +1,6 @@
-; NoelCtrls.def : Declares the module parameters.
+; MBPctrls.def : Declares the module parameters.
 
-LIBRARY      "NoelCtrls.OCX"
+LIBRARY      "MBPctrls.OCX"
 
 EXPORTS
 	DllCanUnloadNow     PRIVATE

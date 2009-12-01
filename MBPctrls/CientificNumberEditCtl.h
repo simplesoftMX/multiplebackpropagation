@@ -83,11 +83,7 @@ class CientificNumberCtrl : public OleControlWithChangeEvent {
 	//}}AFX_VIRTUAL
 
 	private :
-		BEGIN_OLEFACTORY(CientificNumberCtrl) // Class factory and guid
-			virtual BOOL VerifyUserLicense();
-			virtual BOOL GetLicenseKey(DWORD, BSTR FAR*);
-		END_OLEFACTORY(CientificNumberCtrl)
-
+		DECLARE_OLECREATE_EX(CientificNumberCtrl) // Class factory and guid
 		DECLARE_OLETYPELIB(CientificNumberCtrl) // GetTypeInfo
 		DECLARE_OLECTLTYPE(CientificNumberCtrl)	// Type name and misc status
 

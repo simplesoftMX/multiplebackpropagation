@@ -18,16 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/**
- Class    : EditUnsignedInt
- Purpose  : class for editing unsigned int numbers.
- Date     : 27 of September of 2000
- Reviewed : Never
- Version  : 1.0.0
-*/
-#include "../Common/Edit/EditUnsignedWnd.h"
+// stdafx.cpp : source file that includes just the standard includes
+//  MBPctrls.pch will be the pre-compiled header
+//  stdafx.obj will contain the pre-compiled type information
 
-class EditUnsignedInt : public EditUnsignedWnd {
-	private :
-		virtual void ValueChanged();
-};
+#include "stdafx.h"

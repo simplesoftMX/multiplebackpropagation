@@ -46,8 +46,8 @@
 */
 #pragma once
 
-#include "../../Common/OleControls/OleControlWithChangeEvent.h"
-#include "../../Common/Bitmap/Bitmap.h"
+#include "../Common/OleControls/OleControlWithChangeEvent.h"
+#include "../Common/Bitmap/Bitmap.h"
 #include "../MBPCommon.h"
 #include "BPTopologyWnd.h"
 
@@ -142,13 +142,9 @@ class CMBPTopologyCtrl : public OleControlWithChangeEvent {
 		virtual void OnEnabledChanged();
 
 	private :
-		BEGIN_OLEFACTORY(CMBPTopologyCtrl)        // Class factory and guid
-			virtual BOOL VerifyUserLicense();
-			virtual BOOL GetLicenseKey(DWORD, BSTR FAR*);
-		END_OLEFACTORY(CMBPTopologyCtrl)
-
-		DECLARE_OLETYPELIB(CMBPTopologyCtrl)      // GetTypeInfo
-		DECLARE_OLECTLTYPE(CMBPTopologyCtrl)		// Type name and misc status
+		DECLARE_OLECREATE_EX(CMBPTopologyCtrl)	// Class factory and guid
+		DECLARE_OLETYPELIB(CMBPTopologyCtrl)	// GetTypeInfo
+		DECLARE_OLECTLTYPE(CMBPTopologyCtrl)	// Type name and misc status
 
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		afx_msg void OnSetFocus(CWnd* pOldWnd);

@@ -44,10 +44,10 @@
 #ifndef BPTopologyWnd_h
 #define BPTopologyWnd_h
 
-#include "../../Common/Wnd/Wnd.h"
-#include "../../Common/Pointers/Array.h"
-#include "../../Common/Pointers/List.h"
-#include "../../Common/FlickerFreeDC/FlickerFreeDC.h"
+#include "../Common/Wnd/Wnd.h"
+#include "../Common/Pointers/Array.h"
+#include "../Common/Pointers/List.h"
+#include "../Common/FlickerFreeDC/FlickerFreeDC.h"
 #include "../MBPCommon.h"
 #include "IOConnectionCheckBox.h"
 #include "EditUnsignedInt.h"

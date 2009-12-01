@@ -45,7 +45,7 @@
 #include "BPTopologyWnd.h"
 #include "MBPTopologyCtrl.h"
 #include "MBPTopology.h"
-#include "../../Common/Rect/Rect.h"
+#include "../Common/Rect/Rect.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW

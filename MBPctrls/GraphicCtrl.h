@@ -227,11 +227,7 @@ class GraphicCtrl : public COleControl {
 		//}}AFX_VIRTUAL
 
 	private :
-		BEGIN_OLEFACTORY(GraphicCtrl) // Class factory and guid
-			virtual BOOL VerifyUserLicense();
-			virtual BOOL GetLicenseKey(DWORD, BSTR FAR*);
-		END_OLEFACTORY(GraphicCtrl)
-
+		DECLARE_OLECREATE_EX(GraphicCtrl) // Class factory and guid
 		DECLARE_OLETYPELIB(GraphicCtrl)  // GetTypeInfo
 		DECLARE_OLECTLTYPE(GraphicCtrl)	 // Type name and misc status
 

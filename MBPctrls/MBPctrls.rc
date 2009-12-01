@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Microsoft Visual C++ generated resource script.
+//Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -35,41 +35,33 @@
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
-/////////////////////////////////////////////////////////////////////////////
-// Portuguese (Portugal) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_PTG)
-#ifdef _WIN32
-LANGUAGE LANG_PORTUGUESE, SUBLANG_PORTUGUESE
-#pragma code_page(1252)
-#endif //_WIN32
-
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
 //
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
-    "resource.h\0"
+	"resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
-    "#ifndef APSTUDIO_INVOKED\r\n"
+	"#ifndef APSTUDIO_INVOKED\r\n"
     "#include ""targetver.h""\r\n"
     "#endif\r\n"
-    "#include ""afxres.h""\r\n"
-    "\0"
+	"#include ""afxres.h""\r\n"
+	"\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
-    "1 TYPELIB ""NoelCtrls.tlb""\r\n"
+	"1 TYPELIB ""MBPctrls.tlb""\r\n"
     "\0"
 END
 
+/////////////////////////////////////////////////////////////////////////////
 #endif    // APSTUDIO_INVOKED
 
 
@@ -96,21 +88,21 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "Noel Lopes"
-            VALUE "FileDescription", "NoelCtrls ActiveX Control Module"
+            VALUE "FileDescription", "MBPctrls ActiveX Control Module"
             VALUE "FileVersion", "1.0.0.1"
-            VALUE "InternalName", "NoelCtrls.ocx"
-            VALUE "LegalCopyright", "Copyright (C) 1999-2008, Noel de Jesus Mendonça Lopes"
-            VALUE "OriginalFilename", "NoelCtrls.ocx"
-            VALUE "ProductName", "NoelCtrls ActiveX Control Module"
+            VALUE "InternalName", "MBPctrls.ocx"
+            VALUE "LegalCopyright", "Copyright (C) 1999-2009, Noel de Jesus Mendonça Lopes"
+            VALUE "OriginalFilename", "MBPctrls.ocx"
+            VALUE "ProductName", "MBPctrls ActiveX Control Module"
             VALUE "ProductVersion", "1.0.0.1"
+            VALUE "OLESelfRegister", ""
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x409, 1252
+		VALUE "Translation", 0x0409, 1252
     END
 END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -119,7 +111,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ABOUTDLL            ICON                    "NoelCtrls.ico"
+IDI_ABOUTDLL    ICON         "MBPctrls.ico"
 IDI_OpenSaveDialog      ICON                    "OpenSaveDialog.ico"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -140,18 +132,18 @@ IDB_UNSIGNEDEDIT        BITMAP                  "UnsignedEdit.bmp"
 IDD_ABOUTBOX DIALOGEX 34, 22, 260, 55
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About FileBox Control"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     ICON            IDI_ABOUTDLL,IDC_STATIC,10,10,20,20
-    LTEXT           "Noel Controls, Version 1.1.0",IDC_STATIC,40,10,170,8
-    LTEXT           "Copyright (C) 1999-2008, Noel de Jesus Mendonça Lopes",IDC_STATIC,40,25,195,8
+    LTEXT           "MBP Controls, Version 1.1.0",IDC_STATIC,40,10,170,8
+    LTEXT           "Copyright (C) 1999-2009, Noel de Jesus Mendonça Lopes",IDC_STATIC,40,25,195,8
     DEFPUSHBUTTON   "OK",IDOK,221,7,32,14,WS_GROUP
 END
 
 IDD_DIALOG_COPYGRAPH DIALOG  0, 0, 118, 60
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Copy graph with ..."
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     LTEXT           "Width",IDC_STATIC,7,6,20,8
     EDITTEXT        IDC_WIDTH,33,5,78,14,ES_AUTOHSCROLL
@@ -164,7 +156,7 @@ END
 IDD_GRAPHIC_SCALE DIALOG  0, 0, 163, 66
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Graphic scale"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,3,49,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,57,49,50,14
@@ -175,6 +167,7 @@ BEGIN
     LTEXT           "Y lower value",IDC_STATIC,6,18,45,10
     LTEXT           "Y upper value",IDC_STATIC,6,33,45,10
 END
+
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -229,6 +222,7 @@ BEGIN
 END
 
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
@@ -242,9 +236,6 @@ BEGIN
     IDS_UNSIGNEDEDIT        "Unsigned edit control"
 END
 
-#endif    // Portuguese (Portugal) resources
-/////////////////////////////////////////////////////////////////////////////
-
 
 
 #ifndef APSTUDIO_INVOKED
@@ -252,7 +243,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-1 TYPELIB "NoelCtrls.tlb"
+1 TYPELIB "MBPctrls.tlb"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

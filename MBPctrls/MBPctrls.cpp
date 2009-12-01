@@ -25,7 +25,7 @@
 */
 
 #include "stdafx.h"
-#include "NoelCtrls.h"
+#include "MBPctrls.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -48,7 +48,7 @@
                                                   ------------
 */
 #include "stdafx.h"
-#include "NoelCtrls.h"
+#include "MBPctrls.h"
 #include "FileDialog.h"
 
 #ifdef _DEBUG

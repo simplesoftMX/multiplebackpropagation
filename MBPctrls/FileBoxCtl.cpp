@@ -45,7 +45,7 @@
                                             --------------
 */
 #include "stdafx.h"
-#include "NoelCtrls.h"
+#include "MBPctrls.h"
 #include "FileBoxCtl.h"
 
 #ifdef _DEBUG
@@ -84,7 +84,7 @@ BEGIN_EVENT_MAP(CFileBoxCtrl, OleControlWithChangeEvent)
 	//}}AFX_EVENT_MAP
 END_EVENT_MAP()
 
-IMPLEMENT_OLECREATE_EX(CFileBoxCtrl, "NoelCtrls.FileBoxCtrl",	0xd88f0106, 0x321c, 0x11d3, 0x87, 0x6, 0xe7, 0x54, 0x9f, 0x7f, 0x7d, 0x3c) // Initialize class factory and guid
+IMPLEMENT_OLECREATE_EX(CFileBoxCtrl, "MBPctrls.FileBoxCtrl",	0xd88f0106, 0x321c, 0x11d3, 0x87, 0x6, 0xe7, 0x54, 0x9f, 0x7f, 0x7d, 0x3c) // Initialize class factory and guid
 
 IMPLEMENT_OLETYPELIB(CFileBoxCtrl, _tlid, _wVerMajor, _wVerMinor) // Type library ID and version
 
@@ -110,33 +110,6 @@ BOOL CFileBoxCtrl::CFileBoxCtrlFactory::UpdateRegistry(BOOL bRegister) {
 	}	else {
 		return AfxOleUnregisterClass(m_clsid, m_lpszProgID);
 	}
-}
-
-static const TCHAR BASED_CODE _szLicFileName[] = _T("NoelCtrls.lic");
-
-static const WCHAR BASED_CODE _szLicString[] = L"Copyright (c) 1999-2008, Noel de Jesus Mendonça Lopes";
-
-/**
- Method  : BOOL CFileBoxCtrl::CFileBoxCtrlFactory::VerifyUserLicense()
- Purpose : Verify if the user as a licence to use
-           the FileBox control for designing.
- Version : 1.0.0
-*/
-BOOL CFileBoxCtrl::CFileBoxCtrlFactory::VerifyUserLicense() {
-	return AfxVerifyLicFile(AfxGetInstanceHandle(), _szLicFileName, _szLicString);
-}
-
-/**
- Method  : BOOL CFileBoxCtrl::CFileBoxCtrlFactory::GetLicenseKey(DWORD dwReserved,	BSTR FAR* pbstrKey)
- Purpose : Requests a unique license key from the control’s DLL 
-           and stores it in the BSTR pointed to by pbstrKey.
- Version : 1.0.0
-*/
-BOOL CFileBoxCtrl::CFileBoxCtrlFactory::GetLicenseKey(DWORD dwReserved,	BSTR FAR* pbstrKey) {
-	if (pbstrKey == NULL)	return FALSE;
-
-	*pbstrKey = SysAllocString(_szLicString);
-	return (*pbstrKey != NULL);
 }
 
 /**

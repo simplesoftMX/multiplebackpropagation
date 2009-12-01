@@ -47,7 +47,7 @@
 #ifndef IOConnectionCheckBox_h
 #define IOConnectionCheckBox_h
 
-#include "../../Common/CheckBox/CheckBox.h"
+#include "../Common/CheckBox/CheckBox.h"
 
 #if _MSC_VER > 1000
 	#pragma once

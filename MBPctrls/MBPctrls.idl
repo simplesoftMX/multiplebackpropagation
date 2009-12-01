@@ -19,15 +19,15 @@
 */
 
 /**
- File     : Description of the NoelControls controls.
+ File     : Description of the MBPctrls controls.
  Date     : 4 of July of 1999
- Reviewed : 2 of April of 2000
+ Reviewed : 30 of November of 2009
 */
 #include <olectl.h>
 #include <idispids.h>
 
-[ uuid(DBB7B7DC-0F2C-4A1B-BC2F-FF0ED50595D9), version(1.0), helpfile("NoelCtrls.hlp"), helpstring("NoelCtrls ActiveX Control module"), control ]
-library NoelCtrlsLib {
+[ uuid(DBB7B7DC-0F2C-4A1B-BC2F-FF0ED50595D9), version(1.0), helpstring("MBPctrls ActiveX Control module"), control ]
+library MBPctrlsLib {
 	importlib(STDOLE_TLB);
 	importlib(STDTYPE_TLB);
 
@@ -68,7 +68,7 @@ library NoelCtrlsLib {
 	};
 
 	//  Class information for CFileBoxCtrl
-	[ uuid(D88F0106-321C-11D3-8706-E7549F7F7D3C), licensed, helpstring("FileBox Control"), control ]
+	[ uuid(D88F0106-321C-11D3-8706-E7549F7F7D3C), helpstring("FileBox Control"), control ]
 	coclass FileBox	{
 		[default] dispinterface _DFileBox;
 		[default, source] dispinterface _DFileBoxEvents;
@@ -103,7 +103,7 @@ library NoelCtrlsLib {
 	};
 
 	// Class information for CientificNumberCtrl
-	[ uuid(D88F0109-321C-11D3-8706-E7549F7F7D3C), licensed, helpstring("CientificNumberBox Control"), control ]
+	[ uuid(D88F0109-321C-11D3-8706-E7549F7F7D3C), helpstring("CientificNumberBox Control"), control ]
 	coclass CientificNumberBox	{
 		[default] dispinterface _DCientificNumber;
 		[default, source] dispinterface _DCientificNumberEvents;
@@ -142,7 +142,7 @@ library NoelCtrlsLib {
 	};
 
 	// Class information for GraphicCtrl
-	[ uuid(D88F010C-321C-11D3-8706-E7549F7F7D3C), licensed, helpstring("Graphic Control"), control ]
+	[ uuid(D88F010C-321C-11D3-8706-E7549F7F7D3C), helpstring("Graphic Control"), control ]
 	coclass Graphic	{
 		[default] dispinterface _DGraphic;
 		[default, source] dispinterface _DGraphic;
@@ -178,7 +178,7 @@ library NoelCtrlsLib {
 	};
 
 	// Class information for UnsignedEditCtrl
-	[ uuid(D88F010F-321C-11D3-8706-E7549F7F7D3C), licensed, helpstring("UnsignedEdit Control"), control ]
+	[ uuid(D88F010F-321C-11D3-8706-E7549F7F7D3C), helpstring("UnsignedEdit Control"), control ]
 	coclass UnsignedEdit {
 		[default] dispinterface _DUnsignedEdit;
 		[default, source] dispinterface _DUnsignedEditEvents;

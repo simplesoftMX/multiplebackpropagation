@@ -47,7 +47,7 @@
 #ifndef ComboLayerActivationFunction_h
 #define ComboLayerActivationFunction_h
 
-#include "../../Common/ComboBox/ComboBox.h"
+#include "../Common/ComboBox/ComboBox.h"
 
 class ComboLayerActivationFunction : public ComboBox {
 	protected:

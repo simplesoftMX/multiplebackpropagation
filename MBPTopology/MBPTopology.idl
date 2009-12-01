@@ -66,7 +66,7 @@ library MBPTopologyLib {
 
 	//  Class information for CMBPTopologyCtrl
 
-	[ uuid(E4FB26E6-CEFB-47C9-9250-7E45DC0C9E50), licensed, helpstring("MBPTopology Control"), control ]
+	[ uuid(E4FB26E6-CEFB-47C9-9250-7E45DC0C9E50), helpstring("MBPTopology Control"), control ]
 	coclass MBPTopology {
 		[default] dispinterface _DMBPTopology;
 		[default, source] dispinterface _DMBPTopologyEvents;

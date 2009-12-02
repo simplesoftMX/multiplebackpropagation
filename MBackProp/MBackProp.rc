@@ -1,0 +1,559 @@
+/*
+	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
+
+	This file is part of Multiple Back-Propagation.
+
+    Multiple Back-Propagation is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 235, 42
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Multiple Back-Propagation"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,12,20,20
+    LTEXT           "Multiple Back-Propagation Version 2.1.0",IDC_STATIC,40,10,137,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 1999-2009, Noel de Jesus Mendonça Lopes",IDC_STATIC,40,25,188,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
+END
+
+IDD_MBACKPROP_DIALOG DIALOGEX 0, 0, 700, 446
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Multiple Back-Propagation v. 2.1.0"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Data files",IDC_FRAMEDATAFILES,1,0,462,42,0,WS_EX_TRANSPARENT
+    LTEXT           "Train",IDC_STATIC,5,11,17,8
+    CONTROL         "",IDC_TrainFileBox,
+                    "{D88F0106-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,23,9,436,13
+    LTEXT           "Test",IDC_STATIC,5,28,15,8
+    CONTROL         "",IDC_TestFileBox,
+                    "{D88F0106-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,23,25,436,13
+    CONTROL         "",IDC_TAB,"SysTabControl32",WS_TABSTOP,3,43,408,281
+    DEFPUSHBUTTON   "&Train",IDTRAIN,467,4,46,14
+    PUSHBUTTON      "&Stop",IDSTOP,467,27,46,14,WS_DISABLED
+    GROUPBOX        "Epoch",IDC_FRAMEEPOCH,414,43,113,22
+    RTEXT           "0",IDC_EPOCH,418,54,97,9
+    GROUPBOX        "Learning",IDC_FRAMELEARNING,414,66,113,117,0,WS_EX_TRANSPARENT
+    GROUPBOX        "Main Network",IDC_MAINNETLEARNINGFRAME,417,76,107,43,0,WS_EX_TRANSPARENT
+    LTEXT           "Learning Rate",IDC_LABEL_MAIN_LEARNING,421,89,45,9
+    CONTROL         "",IDC_MAIN_LEARNING,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,469,87,51,12
+    LTEXT           "Momentum",IDC_LABEL_MAIN_MOMENTUM,421,105,45,9
+    CONTROL         "",IDC_MAIN_MOMENTUM,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,469,103,51,12
+    GROUPBOX        "Space Network",IDC_SPACENETLEARNINGFRAME,417,120,107,43,0,WS_EX_TRANSPARENT
+    LTEXT           "Learning Rate",IDC_LABEL_SPACE_LEARNING,421,134,45,9
+    CONTROL         "",IDC_SPACE_LEARNING,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,469,131,51,12
+    LTEXT           "Momentum",IDC_LABEL_SPACE_MOMENTUM,421,150,45,9
+    CONTROL         "",IDC_SPACE_MOMENTUM,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,469,147,51,12
+    PUSHBUTTON      "Configuration",IDLEARNINGMOMENTUM,417,165,107,14
+    GROUPBOX        "Root Mean Square Error",IDC_FRAMERMS,413,186,113,101
+    GROUPBOX        "Main Network",IDC_MAINNETRMSFRAME,417,197,107,42,0,WS_EX_TRANSPARENT
+    RTEXT           "Training",IDC_LABEL_TRAINRMSDISPLAY,429,212,24,9
+    RTEXT           "1.0000000000",IDC_TRAIN_RMS,455,212,58,10
+    RTEXT           "Testing",IDC_LABEL_TESTRMSDISPLAY,429,224,24,9
+    RTEXT           "1.0000000000",IDC_TEST_RMS,455,224,58,10
+    GROUPBOX        "Space Network",IDC_SPACENETRMSFRAME,417,242,107,43,0,WS_EX_TRANSPARENT
+    RTEXT           "Training",IDC_LABEL_TRAINRMSDISPLAY_SPACE,429,256,24,9
+    RTEXT           "1.0000000000",IDC_TRAIN_RMS_SPACE,455,256,58,10
+    RTEXT           "Testing",IDC_LABEL_TESTRMSDISPLAY_SPACE,429,269,24,9
+    RTEXT           "1.0000000000",IDC_TEST_RMS_SPACE,455,269,58,10
+    GROUPBOX        "Weights",IDC_FRAME_WEIGHTS,413,288,113,75
+    PUSHBUTTON      "Randomize",IDRANDOMIZEWEIGHTS,416,298,107,14
+    PUSHBUTTON      "View",IDVIEWWEIGHTS,416,314,107,14
+    PUSHBUTTON      "Load",IDLOADWEIGHTS,416,330,107,14
+    PUSHBUTTON      "&Save",IDSAVEWEIGHTS,416,346,107,14
+    GROUPBOX        "Network",IDC_FRAME_NETWORK,413,364,113,80
+    PUSHBUTTON      "Generate C code",IDCCODE,416,375,107,14
+    PUSHBUTTON      "Load",IDLOADNETWORK,416,392,107,14
+    PUSHBUTTON      "Save",IDSAVENETWORK,416,409,107,14
+    PUSHBUTTON      "Input Sensitivity",IDSENSIVITY,416,426,107,15
+END
+
+IDD_RANDWEIGHTS DIALOGEX 0, 0, 127, 86
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Randomize Weights"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Initialize weights between :",IDC_STATIC,4,7,119,11
+    CONTROL         "",IDC_INITIALWEIGHT,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,3,20,121,13
+    LTEXT           "and :",IDC_STATIC,4,36,119,11
+    CONTROL         "",IDC_FINALWEIGHT,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,3,50,121,13
+    DEFPUSHBUTTON   "OK",IDOK,4,68,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,56,68,50,14
+END
+
+IDD_LOADSAVE DIALOGEX 0, 0, 216, 45
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_FILEBOX,"{D88F0106-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,6,9,204,12
+    DEFPUSHBUTTON   "OK",IDOK,3,27,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,57,27,50,14
+    GROUPBOX        "Filename",IDC_STATIC,3,0,210,24
+END
+
+IDD_LEARNING_MOMENTUM DIALOGEX 0, 0, 315, 442
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Network learning configuration"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "CUDA",IDC_STATIC,1,3,307,46,0,WS_EX_TRANSPARENT
+    CONTROL         "Enable CUDA (Requires a NVIDIA GPU)",IDC_ENABLE_CUDA,
+                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,7,36,140,10
+    GROUPBOX        "Adaptive step sizes",IDC_STATIC,1,51,307,46,0,WS_EX_TRANSPARENT
+    CONTROL         "Use adaptive step sizes (Use an individual step size for each weight)",IDC_DELTA_BAR_DELTA,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,63,231,11
+    LTEXT           "u (up/increment)",IDC_STATIC,6,79,53,13
+    CONTROL         "",IDC_UP_DBD,"{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,61,77,58,13
+    LTEXT           "d (down/decrement)",IDC_STATIC,125,79,65,13
+    CONTROL         "",IDC_DOWN_DBD,"{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,192,77,58,13
+    GROUPBOX        "Learning rate and momentum configuration",IDC_LM_CONF2,1,99,307,138,0,WS_EX_TRANSPARENT
+    GROUPBOX        "Automaticaly updade the",IDC_STATIC,5,109,119,26
+    CONTROL         "Learning rate",IDC_AUTO_UPDATE_LEARNING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,121,56,11
+    CONTROL         "Momentum",IDC_AUTO_UPDATE_MOMENTUM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,73,121,50,11
+    GROUPBOX        "Main Network",IDC_MAINFRAME2,5,138,300,47,0,WS_EX_TRANSPARENT
+    LTEXT           "Initial learning rate",IDC_LB_MLR,10,150,65,11
+    CONTROL         "",IDC_MAIN_NET_LEARNING,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,76,148,52,13
+    LTEXT           "Decay",IDC_STATIC,132,150,22,13
+    CONTROL         "",IDC_MAIN_NET_LEARN_PERC_DECAY,
+                    "{D88F010F-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,157,148,24,13
+    LTEXT           "% after each",IDC_STATIC,183,150,45,13
+    CONTROL         "",IDC_MAIN_NET_LEARN_EPOCH_DECAY,
+                    "{D88F010F-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,229,148,45,13
+    LTEXT           "epochs",IDC_EPOCHSCAPTION,277,150,24,13
+    LTEXT           "Initial momentum",IDC_LB_MM,10,170,65,10
+    CONTROL         "",IDC_MAIN_NET_MOMENTUM,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,76,167,52,13
+    LTEXT           "Decay",IDC_STATIC,132,170,22,13
+    CONTROL         "",IDC_MAIN_NET_MOM_PERC_DECAY,
+                    "{D88F010F-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,157,167,24,13
+    LTEXT           "% after each",IDC_STATIC,183,170,44,13
+    CONTROL         "",IDC_MAIN_NET_MOM_EPOCH_DECAY,
+                    "{D88F010F-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,229,167,45,13
+    LTEXT           "epochs",IDC_STATIC,277,170,24,13
+    GROUPBOX        "Space Network",IDC_SPACEFRAME,5,187,300,47,0,WS_EX_TRANSPARENT
+    LTEXT           "Initial learning rate",IDC_LB_SLR,10,199,65,11
+    CONTROL         "",IDC_SPACE_NET_LEARNIG,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,76,197,52,13
+    LTEXT           "Decay",IDC_STATIC,132,199,22,13
+    CONTROL         "",IDC_SPACE_NET_LEARNIG_PERC_DECAY,
+                    "{D88F010F-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,157,197,24,13
+    LTEXT           "% after each",IDC_STATIC,183,199,45,13
+    CONTROL         "",IDC_SPACE_NET_LEARNIG_EPOCH_DECAY,
+                    "{D88F010F-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,229,197,45,13
+    LTEXT           "epochs",IDC_STATIC,277,199,24,13
+    LTEXT           "Initial momentum",IDC_LB_SM,10,217,65,10
+    CONTROL         "",IDC_SPACE_NET_MOMENTUM,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,76,216,52,13
+    LTEXT           "Decay",IDC_STATIC,132,217,22,13
+    CONTROL         "",IDC_SPACE_NET_MOMENTUM_PERC_DECAY,
+                    "{D88F010F-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,157,216,24,13
+    LTEXT           "% after each",IDC_STATIC,183,218,44,13
+    CONTROL         "",IDC_SPACE_NET_MOMENTUM_EPOCH_DECAY,
+                    "{D88F010F-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,229,216,45,13
+    LTEXT           "epochs",IDC_STATIC,277,217,24,13
+    GROUPBOX        "Stopping Criteria",IDC_STATIC,1,239,307,58,0,WS_EX_TRANSPARENT
+    RADIOBUTTON     "Stop when the training RMS is less than",IDC_STOP_RMS,6,251,141,9,WS_GROUP | WS_TABSTOP
+    RADIOBUTTON     "Stop after",IDC_STOP_EPOCHS,6,267,47,9,WS_TABSTOP
+    CONTROL         "",IDC_RMS_TO_STOP,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_GROUP | WS_TABSTOP,150,250,47,12
+    CONTROL         "",IDC_EPOCHS_TO_STOP,
+                    "{D88F010F-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,54,266,53,12
+    LTEXT           "epochs",IDC_STATIC,112,268,24,9
+    LTEXT           "Stop training the space network when its error (RMS) is lower or equal than",IDC_STATIC,7,283,241,14
+    CONTROL         "",IDC_SPACE_RMS_TO_STOP,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,251,281,52,12
+    GROUPBOX        "Pattern Presentation",IDC_STATIC,1,299,307,52
+    CONTROL         "Batch training",IDC_BATCH,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,7,310,61,9
+    CONTROL         "Online training",IDC_ONLINE,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,7,323,61,9
+    CONTROL         "Present patterns in a random order",IDC_RANDOMIZE_PATTERNS,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,335,124,11
+    GROUPBOX        "Robustness",IDC_STATIC,1,353,219,41,0,WS_EX_TRANSPARENT
+    CONTROL         "Decrease learning rate if RMS grows more than",IDC_ROBUSTNESS,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,5,364,164,11
+    CONTROL         "",IDC_RMS_GROW_PERCENT,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,169,363,38,12
+    LTEXT           "r (reducing/decreasing factor)",IDC_STATIC,5,379,98,13
+    CONTROL         "",IDC_ROBUSTNESS_LR_REDUCE,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,104,378,56,13
+    GROUPBOX        "Weight Decay",IDC_STATIC,224,353,84,41,0,WS_EX_TRANSPARENT
+    LTEXT           "d (decreasing factor)",IDC_STATIC,229,365,68,10
+    CONTROL         "",IDC_WEIGHT_DECAY,
+                    "{D88F0109-321C-11D3-8706-E7549F7F7D3C}",WS_TABSTOP,229,377,74,13
+    LTEXT           "Priority",IDC_STATIC,4,398,23,12
+    COMBOBOX        IDC_THREAD,29,396,278,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Update screen while training",IDC_UPDATE_SCREEN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,4,409,178,11
+    DEFPUSHBUTTON   "OK",IDOK,2,422,32,14
+    PUSHBUTTON      "Cancel",IDCANCEL,38,422,32,14
+    LTEXT           "%",IDC_STATIC,209,365,8,11
+    LTEXT           "CUDA can drastically reduce the amount of time needed to train a neural network, depending on the complexity of your problem and on the GPU available.",IDC_STATIC,7,16,294,19
+END
+
+IDD_GRID_DIALOG DIALOGEX 0, 0, 416, 234
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Weights"
+FONT 12, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Static",IDC_GRID,0,0,416,234,WS_TABSTOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 2,1,0,1
+ PRODUCTVERSION 2,1,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "Comments", "See the licence on the installation files. For further information contact noel@ipg.pt"
+            VALUE "CompanyName", "Noel Lopes"
+            VALUE "FileDescription", "Multiple Back-Propagation"
+            VALUE "FileVersion", "2.1.0.1"
+            VALUE "InternalName", "MBackProp.exe"
+            VALUE "LegalCopyright", "(c) 1999-2009 Noel de Jesus Mendonça Lopes.  All rights reserved."
+            VALUE "LegalTrademarks", "See the licence on the installation files. For further information contact noel@ipg.pt"
+            VALUE "OriginalFilename", "MBackProp.exe"
+            VALUE "ProductName", "Multiple Back-Propagation"
+            VALUE "ProductVersion", "2.1.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 35
+    END
+
+    IDD_MBACKPROP_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 661
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 438
+    END
+
+    IDD_RANDWEIGHTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 120
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 79
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_RANDWEIGHTS DLGINIT
+BEGIN
+    IDC_INITIALWEIGHT, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0810, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_FINALWEIGHT, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0810, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    0
+END
+
+IDD_MBACKPROP_DIALOG DLGINIT
+BEGIN
+    IDC_TrainFileBox, 0x376, 207, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x4398, 0x0000, 0x022c, 0x0000, 0x0044, 
+0x0000, 0x0300, 0xe352, 0x910b, 0xce8f, 0x9d11, 0x00e3, 0x00aa, 0xb84b, 
+0x0151, 0x0000, 0x9000, 0x4401, 0x0142, 0x0600, 0x6154, 0x6f68, 0x616d, 
+0x0001, 0xff00, 0xfffe, 0x4447, 0x6100, 0x7400, 0x6100, 0x2000, 0x6600, 
+0x6900, 0x6c00, 0x6500, 0x7300, 0x2000, 0x2800, 0x2a00, 0x2e00, 0x6400, 
+0x6100, 0x7400, 0x2900, 0x7c00, 0x2a00, 0x2e00, 0x6400, 0x6100, 0x7400, 
+0x7c00, 0x5400, 0x6500, 0x7800, 0x7400, 0x2000, 0x6600, 0x6900, 0x6c00, 
+0x6500, 0x7300, 0x2000, 0x2800, 0x2a00, 0x2e00, 0x7400, 0x7800, 0x7400, 
+0x2900, 0x7c00, 0x2a00, 0x2e00, 0x7400, 0x7800, 0x7400, 0x7c00, 0x4100, 
+0x6c00, 0x6c00, 0x2000, 0x6600, 0x6900, 0x6c00, 0x6500, 0x7300, 0x2000, 
+0x2800, 0x2a00, 0x2e00, 0x2a00, 0x2900, 0x7c00, 0x2a00, 0x2e00, 0x2a00, 
+0x7c00, 0x7c00, 0xff00, 0xfffe, "\000" 
+    IDC_TestFileBox, 0x376, 207, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x4398, 0x0000, 0x022c, 0x0000, 0x0044, 
+0x0000, 0x0300, 0xe352, 0x910b, 0xce8f, 0x9d11, 0x00e3, 0x00aa, 0xb84b, 
+0x0151, 0x0000, 0x9000, 0x4401, 0x0142, 0x0600, 0x6154, 0x6f68, 0x616d, 
+0x0001, 0xff00, 0xfffe, 0x4447, 0x6100, 0x7400, 0x6100, 0x2000, 0x6600, 
+0x6900, 0x6c00, 0x6500, 0x7300, 0x2000, 0x2800, 0x2a00, 0x2e00, 0x6400, 
+0x6100, 0x7400, 0x2900, 0x7c00, 0x2a00, 0x2e00, 0x6400, 0x6100, 0x7400, 
+0x7c00, 0x5400, 0x6500, 0x7800, 0x7400, 0x2000, 0x6600, 0x6900, 0x6c00, 
+0x6500, 0x7300, 0x2000, 0x2800, 0x2a00, 0x2e00, 0x7400, 0x7800, 0x7400, 
+0x2900, 0x7c00, 0x2a00, 0x2e00, 0x7400, 0x7800, 0x7400, 0x7c00, 0x4100, 
+0x6c00, 0x6c00, 0x2000, 0x6600, 0x6900, 0x6c00, 0x6500, 0x7300, 0x2000, 
+0x2800, 0x2a00, 0x2e00, 0x2a00, 0x2900, 0x7c00, 0x2a00, 0x2e00, 0x2a00, 
+0x7c00, 0x7c00, 0xff00, 0xfffe, "\000" 
+    IDC_MAIN_LEARNING, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x094d, 
+0x0000, 0x043d, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_MAIN_MOMENTUM, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x094d, 
+0x0000, 0x043d, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_SPACE_LEARNING, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x094d, 
+0x0000, 0x043d, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_SPACE_MOMENTUM, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x094d, 
+0x0000, 0x043d, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    0
+END
+
+IDD_LOADSAVE DLGINIT
+BEGIN
+    IDC_FILEBOX, 0x376, 65, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x1fa0, 0x0000, 0x0211, 0x0000, 0x0044, 
+0x0000, 0x0300, 0xe352, 0x910b, 0xce8f, 0x9d11, 0x00e3, 0x00aa, 0xb84b, 
+0x0151, 0x0000, 0x9000, 0x4401, 0x0142, 0x0600, 0x6154, 0x6f68, 0x616d, 
+0x0001, 0xff00, 0xfffe, 0xff00, 0xfffe, "\000" 
+    0
+END
+
+IDD_LEARNING_MOMENTUM DLGINIT
+BEGIN
+    IDC_UP_DBD, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x08fe, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_DOWN_DBD, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x08fe, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_MAIN_NET_LEARNING, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0810, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_MAIN_NET_LEARN_PERC_DECAY, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0063, 0x0000, 0x0000, 0x0000, 0x03b9, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_MAIN_NET_LEARN_EPOCH_DECAY, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0007, 0x0000, 0x0000, 0x0000, 0x094d, 
+0x0000, 0x043d, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_MAIN_NET_MOMENTUM, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0810, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_MAIN_NET_MOM_PERC_DECAY, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0063, 0x0000, 0x0000, 0x0000, 0x03b9, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_MAIN_NET_MOM_EPOCH_DECAY, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x4240, 0x000f, 0x2710, 0x0000, 0x0707, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_SPACE_NET_LEARNIG, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0810, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_SPACE_NET_LEARNIG_PERC_DECAY, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0063, 0x0000, 0x0000, 0x0000, 0x03b9, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_SPACE_NET_LEARNIG_EPOCH_DECAY, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x4240, 0x000f, 0x2710, 0x0000, 0x0707, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_SPACE_NET_MOMENTUM, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0810, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_SPACE_NET_MOMENTUM_PERC_DECAY, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0063, 0x0000, 0x0000, 0x0000, 0x03b9, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_SPACE_NET_MOMENTUM_EPOCH_DECAY, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x4240, 0x000f, 0x2710, 0x0000, 0x0707, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_RMS_TO_STOP, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0757, 
+0x0000, 0x0211, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_EPOCHS_TO_STOP, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0xe100, 0x05f5, 0x4240, 0x000f, 0x0845, 
+0x0000, 0x0211, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_SPACE_RMS_TO_STOP, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0810, 
+0x0000, 0x0211, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_RMS_GROW_PERCENT, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x05e4, 
+0x0000, 0x0211, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_ROBUSTNESS_LR_REDUCE, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x08af, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_WEIGHT_DECAY, 0x376, 30, 0
+0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0b79, 
+0x0000, 0x022c, 0x0000, 0x0044, 0x0000, 0x01ff, 
+    IDC_THREAD, 0x403, 36, 0
+0x6f4e, 0x6d72, 0x6c61, 0x2820, 0x6153, 0x656d, 0x6120, 0x2073, 0x746f, 
+0x6568, 0x2072, 0x7061, 0x6c70, 0x6369, 0x7461, 0x6f69, 0x736e, 0x0029, 
+
+    IDC_THREAD, 0x403, 38, 0
+0x6948, 0x6867, 0x2820, 0x6948, 0x6867, 0x7265, 0x7420, 0x6168, 0x206e, 
+0x746f, 0x6568, 0x2072, 0x7061, 0x6c70, 0x6369, 0x7461, 0x6f69, 0x736e, 
+0x0029, 
+    IDC_THREAD, 0x403, 66, 0
+0x6552, 0x6c61, 0x7420, 0x6d69, 0x2065, 0x5728, 0x7261, 0x696e, 0x676e, 
+0x2120, 0x2121, 0x4320, 0x5550, 0x6920, 0x2073, 0x6564, 0x6964, 0x6163, 
+0x6574, 0x2064, 0x6e65, 0x6974, 0x6572, 0x796c, 0x7420, 0x206f, 0x6874, 
+0x7369, 0x7020, 0x6f72, 0x7267, 0x6d61, 0x0029, 
+    0
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\MBackProp.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""     // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\MBackProp.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "&About MBP..."
+    IDS_VERSION             "Multiple Back-Propagation Version 2.1.0"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#include "res\MBackProp.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"     // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

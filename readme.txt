@@ -42,5 +42,3 @@ are doing and I miss it in C# and java.
 
 The FlickerFreeDC class was originally based on Keith Rule class (available on the web).
 
-NoelCtrls name obviously needs the name changed. But for now I'm just trying to make the changes necessary to place the code online.
-

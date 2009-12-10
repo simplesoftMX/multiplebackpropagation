@@ -24,7 +24,7 @@
 //
 #define IDS_MBPTOPOLOGY                 1
 #define IDB_MBPTOPOLOGY                 1
-#define IDB_BACK                        204
+#define IDB_BACK                        208
 #define IDB_LINEAR                      209
 #define IDB_GAUSSIAN                    211
 #define IDB_TANH                        213
@@ -34,9 +34,14 @@
 #define IDB_MBP                         218
 #define IDB_MBPHO                       219
 #define IDB_BPS                         220
-#define IDB_MBPS                        221
-#define IDB_MBPHS                       222
+#define IDB_MBPHS                       221
+#define IDB_MBPS                        222
 #define IDB_MBPHOS                      223
+
+#define IDC_BP                          250
+#define IDC_MBPH                        251
+#define IDC_MBP                         252
+#define IDC_MBPHO                       253
 
 // Next default values for new objects
 // 
@@ -44,7 +49,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        224
 #define _APS_NEXT_COMMAND_VALUE         32768
-#define _APS_NEXT_CONTROL_VALUE         206
+#define _APS_NEXT_CONTROL_VALUE         254
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

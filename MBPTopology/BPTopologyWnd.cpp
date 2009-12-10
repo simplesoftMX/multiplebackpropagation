@@ -320,52 +320,49 @@ int BPTopologyWnd::DrawNetwork(FlickerFreeDC & dc, const CRect & drawingArea, in
 	int layers = layersInfo.Lenght();
 
 	if (!layers) {
+		RECT r((RECT)drawingArea);
+	
+		r.left += 21;
+		r.right -= 21;
+		r.top += 7;
+		r.bottom -= 21;
+
+		CFont font;
+		font.CreatePointFont(120, L"Times new roman");
+		dc.SelectFont(&font);
+
+		CString license = L"Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes\n";
+		license += "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. ";
+		license += "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. ";
+		license += "You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.\n";
+
 		if (mainNetwork == NULL) {
-			RECT r((RECT)drawingArea);
-		
-			r.left += 21;
-			r.right -= 21;
-			r.top += 7;
-			r.bottom -= 21;
+			CString s = L"Please properly cite our work if you find it useful. This supports future development. The following articles provided the foundation for Multiple Back-Propagation software (A bib file <mbp.bib> is included with this software):\n";
 
-			CString s = L"Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes\n";
-			s += "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. ";
-			s += "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. ";
-			s += "You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.";
-
-			CFont font;
-			font.CreatePointFont(120, L"Times New Roman");
-			dc.SelectFont(&font);
-
-			r.top += 7 + dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
-
-			dc.Line(r.left, r.top, r.right, r.top);
-
-			r.top += 7;
-
-			s = L"If you use this program for any scientific work, or related, please cite one of the references below and if possible send me an e-mail with the citation to noel@ipg.pt:\n";
-			
 			r.top += dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
 			r.left += 7;
 
-			s = L"Lopes, N. and Ribeiro, B. (2009). GPU Implementation of the Multiple Back-Propagation Algorithm, In Proceedings of Intelligent Data Engineering and Automated Learning. Lecture Notes in Computer Science, Springer-Verlag, volume 5788, pages 449-456.\n\n";
+			s = L"Lopes, N. and Ribeiro, B. (2009). GPU Implementation of the Multiple Back-Propagation Algorithm, In Proceedings of Intelligent Data Engineering and Automated Learning. Lecture Notes in Computer Science, Springer Berlin / Heidelberg, volume 5788, pages 449-456.\n\n";
 			s += L"Lopes, N. and Ribeiro, B. (2003). An Efficient Gradient-Based Learning Algorithm Applied to Neural Networks with Selective Actuation Neurons. In Neural, Parallel & Scientific Computations, volume 11, pages 253-272. Dynamic Publishers.\n\n";
 			s += L"Lopes, N. and Ribeiro, B. (2001). Hybrid learning in a multi neural network architecture. In INNS-IEEE International Joint Conference on Neural Networks, IJCNN'01, volume 4, pages 2788-2793, Washington D.C., USA.\n";
-			
+
 			r.top += dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
 			r.left -= 7;
 
-			s = L"The first article describes the GPU (CUDA) implementation of the Back-Propagation and Multiple Back-Propagation algorithms and compares it to the CPU implementation in terms of speed. The other two articles describe the Multiple Back-Propagation algorithm and compare it with the Back-Propagation algorithm.\n\nThank you.";
-
-			r.top += 7 + dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
-
 			dc.Line(r.left, r.top, r.right, r.top);
-
 			r.top += 7;
-
-			s = L"This program can be freely obtained on the site http://dit.ipg.pt/MBP";
-
+			
+			if (!spaceNetwork->IsWindowVisible()) {
+				license = L"\n" + license;
+				r.top += 7 + dc.DrawText(license, license.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
+				dc.Line(r.left, r.top, r.right, r.top);
+				r.top += 7;
+			}
+			
+			s = L"\nThis program can be freely obtained on the site http://dit.ipg.pt/MBP";
 			dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
+		} else {
+			r.top += 7 + dc.DrawText(license, license.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
 		}
 
 		return 0;

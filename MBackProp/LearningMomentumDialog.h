@@ -88,6 +88,7 @@ class LearningMomentumDialog : public CDialog {
 		CientificNumber rmsToStop;
 		CientificNumber	d;
 		CientificNumber	u;
+		CientificNumber	maxStepSize;
 		CientificNumber	robustnessReduceFactor;
 		CientificNumber	applyRobustnessWhenRMSGrows;
 		CientificNumber	weightDecay;

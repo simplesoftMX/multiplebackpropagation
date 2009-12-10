@@ -1,23 +1,3 @@
-/*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
-
-	This file is part of Multiple Back-Propagation.
-
-    Multiple Back-Propagation is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by MBackProp.rc
@@ -58,6 +38,8 @@
 #define IDSTOP                          1021
 #define IDC_DOWN_DBD                    1022
 #define IDRANDOMIZEWEIGHTS              1023
+#define IDC_DOWN_DBD2                   1023
+#define IDC_MAX_STEPSIZE                1023
 #define IDC_ROBUSTNESS_LR_REDUCE        1024
 #define IDC_TEST_RMS                    1025
 #define IDC_SPACE_RMS_TO_STOP           1026

@@ -111,6 +111,7 @@ void LearningMomentumDialog::OnOK() {
 
 	Connection::u = u.GetValue();
 	Connection::d = d.GetValue();
+	Connection::maxStepSize = maxStepSize.GetValue();
 
 	parent->robustLearning = (useRobustness.GetCheck() > 0);
 
@@ -176,6 +177,7 @@ void LearningMomentumDialog::DoDataExchange(CDataExchange* pDX) {
 	DDX_Control(pDX, IDC_RMS_TO_STOP, rmsToStop);
 	DDX_Control(pDX, IDC_DOWN_DBD, d);
 	DDX_Control(pDX, IDC_UP_DBD, u);
+	DDX_Control(pDX, IDC_MAX_STEPSIZE, maxStepSize);
 	DDX_Control(pDX, IDC_ROBUSTNESS_LR_REDUCE, robustnessReduceFactor);
 	DDX_Control(pDX, IDC_RMS_GROW_PERCENT, applyRobustnessWhenRMSGrows);
 	DDX_Control(pDX, IDC_WEIGHT_DECAY, weightDecay);
@@ -279,6 +281,7 @@ BOOL LearningMomentumDialog::OnInitDialog() {
 
 	u.SetValue(Connection::u);
 	d.SetValue(Connection::d);
+	maxStepSize.SetValue(Connection::maxStepSize);
 
 	useRobustness.SetCheck((parent->robustLearning) ? 1 : 0); 
 	OnRobustness();

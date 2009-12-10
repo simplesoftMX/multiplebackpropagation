@@ -59,3 +59,5 @@ double Connection::u = 1.1;
  Comments  : Used by the Delta-Bar-Delta.
 */
 double Connection::d = 0.9;
+
+double Connection::maxStepSize = 1.0;

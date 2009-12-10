@@ -48,7 +48,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalUsingDirectories="..\NoelGrid\bin\Release"
+				AdditionalIncludeDirectories="$(CUDA_INC_PATH);$(NVSDKCUDA_ROOT)\common\inc"
+				AdditionalUsingDirectories="..\MBPGrid\bin\Release"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -294,7 +295,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="$(CUDA_INC_PATH);$(NVSDKCUDA_ROOT)\common\inc"
-				AdditionalUsingDirectories="..\NoelGrid\bin\Release"
+				AdditionalUsingDirectories="..\MBPGrid\bin\Release"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
@@ -398,6 +399,10 @@
 			</File>
 			<File
 				RelativePath=".\CtrlUnsignedEdit.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\common\CUDA\Cuda.cu"
 				>
 			</File>
 			<File
@@ -654,6 +659,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AditionalDefinitions.h"
+				>
+			</File>
+			<File
 				RelativePath=".\backpropagation.h"
 				>
 			</File>
@@ -759,6 +768,10 @@
 			</File>
 			<File
 				RelativePath=".\targetver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Version.h"
 				>
 			</File>
 			<File

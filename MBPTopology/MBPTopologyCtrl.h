@@ -71,6 +71,8 @@ class CMBPTopologyCtrl : public OleControlWithChangeEvent {
 		*/
 		Pointer<BPTopologyWnd> spaceNetwork;
 
+		Pointer<CBitmapButton> buttonsNetworkTopology[4];
+
 		/**
 		 Attribute : network_type networkType
 		 Purpose   : Contains the netwotk type.
@@ -118,11 +120,13 @@ class CMBPTopologyCtrl : public OleControlWithChangeEvent {
 				}
 
 				networkType = newType;
-
+	
 				Invalidate();
 
 				FireChange();
 			}
+
+			for(int b = 0; b < 4; b++) buttonsNetworkTopology[b]->SetState(networkType == b);
 		}
 
 		BOOL cudaRestrictions;
@@ -142,6 +146,8 @@ class CMBPTopologyCtrl : public OleControlWithChangeEvent {
 		virtual void OnEnabledChanged();
 
 	private :
+		CToolTipCtrl tooltip;
+
 		DECLARE_OLECREATE_EX(CMBPTopologyCtrl)	// Class factory and guid
 		DECLARE_OLETYPELIB(CMBPTopologyCtrl)	// GetTypeInfo
 		DECLARE_OLECTLTYPE(CMBPTopologyCtrl)	// Type name and misc status
@@ -149,7 +155,11 @@ class CMBPTopologyCtrl : public OleControlWithChangeEvent {
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		afx_msg void OnSetFocus(CWnd* pOldWnd);
 		afx_msg void OnSize(UINT nType, int cx, int cy);
-		afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+		//afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+		afx_msg void BPselected();
+		afx_msg void MBPHselected();
+		afx_msg void MBPselected();
+		afx_msg void MBPHOselected();
 		DECLARE_MESSAGE_MAP()
 
 		afx_msg short GetNetworkType();
@@ -185,5 +195,6 @@ class CMBPTopologyCtrl : public OleControlWithChangeEvent {
 			dispidConectInputLayerWithOutputLayer = 9L,
 			eventidChange = 1L,
 		};
+		virtual BOOL PreTranslateMessage(MSG* pMsg);
 };
 

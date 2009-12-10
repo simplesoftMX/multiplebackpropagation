@@ -21,7 +21,7 @@
 #ifndef MBP_CUDA_H
 #define MBP_CUDA_H
 
-//#define MBP_WITH_CUDA
+#define MBP_WITH_CUDA
 
 #ifdef MBP_WITH_CUDA
 	#include "../Common/CUDA/cuda.h"	

@@ -18,37 +18,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/**
- Class    : Cuda
- Purpose  : Initialize a CUDA device
- Date     : 13 of March of 2009
- Reviewed : 1 September 2009
- Version  : 1.0.0
- Comments : For now a single device will be used. No more comments for now.
-*/
+// stdafx.h : include file for standard system include files,
+// or project specific include files that are used frequently, but
+// are changed infrequently
+//
 
-//#include <stdio.h>
-//#include <stdlib.h>
-#include "cuda.h"
-//#include <cutil.h>
+#pragma once
 
-/*#if __DEVICE_EMULATION__
+#ifndef _WIN32_WINNT		// Allow use of features specific to Windows XP or later.                   
+#define _WIN32_WINNT 0x0501	// Change this to the appropriate value to target other versions of Windows.
+#endif						
 
-    Cuda::Cuda() {
-        numberDevices = 1;
-        device = 0;
-    }
-    
-#else*/
+#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 
-    Cuda::Cuda() {
-	    if (cudaGetDeviceCount(&numberDevices) != cudaSuccess) numberDevices = 0;
-	    
-	    for(device = 0; device < numberDevices; device++) {
-		    if(cudaGetDeviceProperties(&deviceProperties, device) == cudaSuccess && deviceProperties.major >= 1) {
-		        if (cudaSetDevice(device) == cudaSuccess) break;
-		    }
-	    }
-    }
 
-//#endif
+
+// TODO: reference additional headers your program requires here

@@ -910,6 +910,7 @@ class CMBackPropDlg : public CDialog {
 			mbp->SetSpaceMomentum(value);
 		}
 
+		void SetWindowTitle(CString & filename);
 		void LoadString(InputFile & f, CString & s);
 		int LoadInt(InputFile & f);
 		double LoadDouble(InputFile & f);

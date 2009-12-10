@@ -138,13 +138,13 @@ CMBackPropDlg::CMBackPropDlg() : CDialog(CMBackPropDlg::IDD) {
 	reloadTrainingData = true;
 	reloadTestingData  = false;
 	autoUpdateLearning = true;
-	autoUpdateMomentum = false; // changed on version 2.1.0
+	autoUpdateMomentum = false; // changed on version 2.0.6
 	epochsStop = false;
 	numberEpochsToStop = 1000000;
 	rmsStop = 0.01;
 	spaceRmsStop = 0.0;
-	randomizePatterns = !useCuda; // changed on version 2.1.0
-	batchTraining = useCuda; // changed on version 2.1.0
+	randomizePatterns = !useCuda; // changed on version 2.0.6
+	batchTraining = useCuda; // changed on version 2.0.6
 	robustLearning = true;
 	rmsGrowToApplyRobustLearning = 1.001;
 	robustFactor = 0.5;
@@ -1372,7 +1372,10 @@ void CMBackPropDlg::OnSelchangeTab(NMHDR * pNMHDR, LRESULT * pResult) {
 			MBPTopologyCtrl->ShowWindow(SW_HIDE);
 			RMSGraphic->ShowWindow(SW_HIDE);
 
-			if (trainingThread == NULL) {
+			#ifdef MBP_WITH_CUDA
+			if (trainingThread == NULL || !useCuda)
+			#endif
+			{
 				if (reloadTestingData) LoadTrainingTestDataIfPossible(false);
 				reloadTrainingData = true;
 
@@ -1388,7 +1391,10 @@ void CMBackPropDlg::OnSelchangeTab(NMHDR * pNMHDR, LRESULT * pResult) {
 			MBPTopologyCtrl->ShowWindow(SW_HIDE);
 			RMSGraphic->ShowWindow(SW_HIDE);
 
-			if (trainingThread == NULL) {
+			#ifdef MBP_WITH_CUDA
+			if (trainingThread == NULL || !useCuda)
+			#endif
+			{
 				if (reloadTestingData || reloadTrainingData) {
 					LoadTrainingTestDataIfPossible(false);
 					if (tabs.GetCurFocus() == tabTopology) break;
@@ -2241,11 +2247,12 @@ bool CMBackPropDlg::SaveNetwork(CString & filename) {
 		CString MBPVersion;
 		MBPVersion.LoadString(IDS_VERSION);
 
+		if (filename.Find('\\') == -1 && filename.Find(':') == -1) filename = path + filename;
 		OutputFile f(filename);
 		CString s;
 
 		f.WriteLine(MBPVersion);
-		f.WriteLine(" Multiple Back-Propagation can be freely obtained at http://dit.ipg.pt/MBP");
+		f.WriteLine("Multiple Back-Propagation can be freely obtained at http://dit.ipg.pt/MBP");
 		f.WriteLine(m_trainFileBox.GetFileName());
 		f.WriteLine(m_testFileBox.GetFileName());
 
@@ -2254,7 +2261,7 @@ bool CMBackPropDlg::SaveNetwork(CString & filename) {
 		f.WriteLine((updateScreen)   ? "1" : "0");
 		
 		f.WriteLine((deltaBarDelta) ? "1" : "0");
-		s.Format(_TEXT("%1.15f\n%1.15f\n"), Connection::u, Connection::d);
+		s.Format(_TEXT("%1.15f\n%1.15f\n%1.15f\n"), Connection::u, Connection::d, Connection::maxStepSize);
 		f.WriteString(s);
 
 		f.WriteLine((robustLearning) ? "1" : "0");
@@ -2381,7 +2388,7 @@ bool CMBackPropDlg::SaveNetwork(CString & filename) {
 			}
 		}
 
-		SetWindowText(CString("Multiple Back Propagation - ") + filename);
+		SetWindowTitle(filename);
 
 		return true;
 	} catch (BasicException e) {
@@ -2397,12 +2404,15 @@ bool CMBackPropDlg::SaveNetwork(CString & filename) {
 */
 bool CMBackPropDlg::LoadNetwork(CString & filename) {
 	try {
+		if (filename.Find('\\') == -1 && filename.Find(':') == -1) filename = path + filename;
 		InputFile f(filename);
 		CString s;
 
 		if (!f.ReadLine(s) || s.Left(34) != "Multiple Back-Propagation Version ") throw BasicException(unrecognizedFormat);
 
 		CString version = s.Mid(34);
+
+		if (version == L"2.1.0") version = "2.0.6"; // This beta version wrote files as the 2.0.6
 
 		if (!f.ReadLine(s)) throw BasicException(unrecognizedFormat); // comment line
 
@@ -2429,6 +2439,8 @@ bool CMBackPropDlg::LoadNetwork(CString & filename) {
 			deltaBarDelta = LoadBool(f);
 			Connection::u = LoadDouble(f);
 			Connection::d = LoadDouble(f);
+			Connection::maxStepSize = 1.0;
+			if (version >= L"2.0.7") Connection::maxStepSize = LoadDouble(f);
 			robustLearning = LoadBool(f);
 			robustFactor = LoadDouble(f);
 			rmsGrowToApplyRobustLearning = LoadDouble(f);
@@ -2663,14 +2675,7 @@ bool CMBackPropDlg::LoadNetwork(CString & filename) {
 			}
 		}
 
-		int pathSeparator = filename.ReverseFind('\\');
-		if (filename.ReverseFind('/') > pathSeparator) pathSeparator = filename.ReverseFind('/');
-		if (pathSeparator == -1) pathSeparator = filename.Find(':');
-
-		version.LoadStringW(IDS_VERSION);
-
-		SetWindowText(version + " > " + filename.Mid(pathSeparator + 1));
-		path = filename.Left(pathSeparator + 1);
+		SetWindowTitle(filename);
 
 		return true;
 	} catch (BasicException e) {
@@ -2679,6 +2684,17 @@ bool CMBackPropDlg::LoadNetwork(CString & filename) {
 	}
 }
 
+void CMBackPropDlg::SetWindowTitle(CString & filename) {
+	int pathSeparator = filename.ReverseFind('\\');
+	if (filename.ReverseFind('/') > pathSeparator) pathSeparator = filename.ReverseFind('/');
+	if (pathSeparator == -1) pathSeparator = filename.Find(':');
+
+	CString version;
+	version.LoadStringW(IDS_VERSION);
+
+	SetWindowText(version + " > " + filename.Mid(pathSeparator + 1));
+	path = filename.Left(pathSeparator + 1);
+}
 
 void CMBackPropDlg::LoadString(InputFile & f, CString & s) {
 	if (!f.ReadLine(s)) throw BasicException(unrecognizedFormat);

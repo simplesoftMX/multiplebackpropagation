@@ -39,7 +39,7 @@
 #ifndef Neuron_h
 #define Neuron_h
 
-#include "DefinicoesAdicionais.h"
+#include "AditionalDefinitions.h"
 #include "ActivationFunctions.h"
 #include "Connection.h"
 #include "../Common/Pointers/List.h"

@@ -18,37 +18,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/**
- Class    : Cuda
- Purpose  : Initialize a CUDA device
- Date     : 13 of March of 2009
- Reviewed : 1 September 2009
- Version  : 1.0.0
- Comments : For now a single device will be used. No more comments for now.
-*/
+// stdafx.cpp : source file that includes just the standard includes
+// MBPCuda.pch will be the pre-compiled header
+// stdafx.obj will contain the pre-compiled type information
 
-//#include <stdio.h>
-//#include <stdlib.h>
-#include "cuda.h"
-//#include <cutil.h>
+#include "stdafx.h"
 
-/*#if __DEVICE_EMULATION__
-
-    Cuda::Cuda() {
-        numberDevices = 1;
-        device = 0;
-    }
-    
-#else*/
-
-    Cuda::Cuda() {
-	    if (cudaGetDeviceCount(&numberDevices) != cudaSuccess) numberDevices = 0;
-	    
-	    for(device = 0; device < numberDevices; device++) {
-		    if(cudaGetDeviceProperties(&deviceProperties, device) == cudaSuccess && deviceProperties.major >= 1) {
-		        if (cudaSetDevice(device) == cudaSuccess) break;
-		    }
-	    }
-    }
-
-//#endif
+// TODO: reference any additional headers you need in STDAFX.H
+// and not in this file

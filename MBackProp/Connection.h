@@ -30,7 +30,7 @@
 
 #include <stdlib.h>
 
-#include "DefinicoesAdicionais.h"
+#include "AditionalDefinitions.h"
 
 class Connection {
 	private :
@@ -122,6 +122,8 @@ class Connection {
 		*/
 		static double d;
 
+		static double maxStepSize;
+
 		/**
 		 Attribute : double input
 		 Purpose   : keeps the input of the connection, 
@@ -202,7 +204,7 @@ class Connection {
 		void UpdateLearningRate() {
 			if (lastDeltaWithoutLearningMomentum != 0 && deltaWithoutLearningMomentum != 0.0) {
 				learningRate *= ((lastDeltaWithoutLearningMomentum * deltaWithoutLearningMomentum) > 0.0) ? u : d;
-				if (learningRate > 1.0) learningRate = 1.0;
+				if (learningRate > Connection::maxStepSize) learningRate = Connection::maxStepSize;
 			}
 			lastDeltaWithoutLearningMomentum = deltaWithoutLearningMomentum;
 			deltaWithoutLearningMomentum = newDelta;

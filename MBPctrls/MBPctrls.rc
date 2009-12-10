@@ -1,24 +1,4 @@
-/*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
-
-	This file is part of Multiple Back-Propagation.
-
-    Multiple Back-Propagation is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-//Microsoft Visual C++ generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -35,33 +15,41 @@
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
+/////////////////////////////////////////////////////////////////////////////
+// Portuguese (Portugal) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_PTG)
+#ifdef _WIN32
+LANGUAGE LANG_PORTUGUESE, SUBLANG_PORTUGUESE
+#pragma code_page(1252)
+#endif //_WIN32
+
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
 //
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
-	"resource.h\0"
+    "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
-	"#ifndef APSTUDIO_INVOKED\r\n"
+    "#ifndef APSTUDIO_INVOKED\r\n"
     "#include ""targetver.h""\r\n"
     "#endif\r\n"
-	"#include ""afxres.h""\r\n"
-	"\0"
-END
-
-3 TEXTINCLUDE
-BEGIN
-	"1 TYPELIB ""MBPctrls.tlb""\r\n"
+    "#include ""afxres.h""\r\n"
     "\0"
 END
 
-/////////////////////////////////////////////////////////////////////////////
+3 TEXTINCLUDE 
+BEGIN
+    "1 TYPELIB ""MBPctrls.tlb""\r\n"
+    "\0"
+END
+
 #endif    // APSTUDIO_INVOKED
 
 
@@ -95,14 +83,14 @@ BEGIN
             VALUE "OriginalFilename", "MBPctrls.ocx"
             VALUE "ProductName", "MBPctrls ActiveX Control Module"
             VALUE "ProductVersion", "1.0.0.1"
-            VALUE "OLESelfRegister", ""
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-		VALUE "Translation", 0x0409, 1252
+        VALUE "Translation", 0x409, 1252
     END
 END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -111,7 +99,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ABOUTDLL    ICON         "MBPctrls.ico"
+IDI_ABOUTDLL            ICON                    "MBPctrls.ico"
 IDI_OpenSaveDialog      ICON                    "OpenSaveDialog.ico"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -169,7 +157,6 @@ BEGIN
 END
 
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // DESIGNINFO
@@ -222,7 +209,6 @@ BEGIN
 END
 
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
@@ -235,6 +221,9 @@ BEGIN
     IDS_GRAPHIC             "2D Line Graphic Control"
     IDS_UNSIGNEDEDIT        "Unsigned edit control"
 END
+
+#endif    // Portuguese (Portugal) resources
+/////////////////////////////////////////////////////////////////////////////
 
 
 

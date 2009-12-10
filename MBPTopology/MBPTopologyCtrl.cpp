@@ -59,8 +59,12 @@ BEGIN_MESSAGE_MAP(CMBPTopologyCtrl, OleControlWithChangeEvent)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
 	ON_WM_SIZE()
-	ON_WM_LBUTTONDOWN()
+	//ON_WM_LBUTTONDOWN()
 	ON_OLEVERB(AFX_IDS_VERB_PROPERTIES, OnProperties)
+	ON_BN_CLICKED(IDC_BP, BPselected)
+	ON_BN_CLICKED(IDC_MBPH, MBPHselected)
+	ON_BN_CLICKED(IDC_MBP, MBPselected)
+	ON_BN_CLICKED(IDC_MBPHO, MBPHOselected)
 END_MESSAGE_MAP()
 
 BEGIN_DISPATCH_MAP(CMBPTopologyCtrl, OleControlWithChangeEvent)
@@ -119,12 +123,36 @@ CMBPTopologyCtrl::CMBPTopologyCtrl() {
 	InitializeIIDs(&IID_DMBPTopology, &IID_DMBPTopologyEvents);
 	networkType = BP;
 
-	Bitmap bp;
-	bp.LoadBitmap(IDB_BP);
-	widthNetworkBmps = bp.Width();
-	heightNetworkBmps = bp.Height();
+	widthNetworkBmps = heightNetworkBmps = 0;
+
+	Bitmap b;
+	b.LoadBitmap(IDB_BP);
+	widthNetworkBmps = b.Width();
+	heightNetworkBmps = b.Height();
+
+	/*for (int t = 0; t < 4; t++) {		
+		b.LoadBitmap(IDB_BP + t);
+		if (widthNetworkBmps < b.Width()) widthNetworkBmps = b.Width();
+		if (heightNetworkBmps < b.Height()) heightNetworkBmps = b.Height();
+	}*/
 
 	cudaRestrictions = FALSE;
+}
+
+void CMBPTopologyCtrl::BPselected() {
+	ChangeNetworkType(BP);
+}
+
+void CMBPTopologyCtrl::MBPHselected() {
+	ChangeNetworkType(MBPH);
+}
+
+void CMBPTopologyCtrl::MBPselected() {
+	ChangeNetworkType(MBP);
+}
+
+void CMBPTopologyCtrl::MBPHOselected() {
+	ChangeNetworkType(MBPHO);
 }
 
 /**
@@ -149,9 +177,7 @@ int CMBPTopologyCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	CRect ctrlRect;
 	GetClientRect(ctrlRect);
 
-	Bitmap b;
-	b.LoadBitmap(IDB_BP);
-	ctrlRect.bottom -= b.Height();
+	ctrlRect.bottom -= heightNetworkBmps;
 
 	mainNetwork = new BPTopologyWnd();
 	if (mainNetwork.IsNull()) return -1;
@@ -163,6 +189,23 @@ int CMBPTopologyCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 
 	ctrlRect.left += ctrlRect.Width() / 2 + 1;
 	if (!spaceNetwork->Create(ctrlRect, this, false, true)) return -1;
+
+	for (int b = 0; b < 4; b++) {
+		int x = (int) (b * widthNetworkBmps * 1.1);
+
+		buttonsNetworkTopology[b] = new CBitmapButton();
+		if (!buttonsNetworkTopology[b]->Create(L"", WS_CHILD | WS_VISIBLE | BS_PUSHLIKE | BS_AUTOCHECKBOX | BS_OWNERDRAW, CRect(x, ctrlRect.bottom, x + widthNetworkBmps-1, ctrlRect.bottom + heightNetworkBmps-1), this, IDC_BP + b)) return -1;
+		if (!buttonsNetworkTopology[b]->LoadBitmaps(IDB_BP + b, IDB_BPS + b)) return -1;
+	}
+
+	buttonsNetworkTopology[0]->SetState(TRUE);
+
+	if (tooltip.Create(this)) {
+		tooltip.AddTool((CBitmapButton *) buttonsNetworkTopology[BP], L"Feed-Forward network");
+		tooltip.AddTool((CBitmapButton *) buttonsNetworkTopology[MBPH], L"Multiple Feed-Forward network (only the hidden layers of the main network have neurons with selective actuation)");
+		tooltip.AddTool((CBitmapButton *) buttonsNetworkTopology[MBP], L"Multiple Feed-Forward network");
+		tooltip.AddTool((CBitmapButton *) buttonsNetworkTopology[MBPHO], L"Multiple Feed-Forward network (you can specify which neurons have selective actuation)");
+	}
 
 	return 0;
 }
@@ -209,6 +252,11 @@ void CMBPTopologyCtrl::OnSize(UINT nType, int cx, int cy) {
 	int xSep = cx / 2 + 1;
 	mainNetwork->Move(0, 0, (networkType == BP) ? cx : xSep - 1, cy);
 	spaceNetwork->Move(xSep, 0, cx - xSep, cy);
+
+	for (int b = 0; b < 4; b++) {
+		int x = (int) (b * widthNetworkBmps * 1.1);
+		buttonsNetworkTopology[b]->MoveWindow(x, cy, widthNetworkBmps, heightNetworkBmps);
+	}
 }
 
 /**
@@ -279,14 +327,15 @@ void CMBPTopologyCtrl::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcIn
 
 	FlickerFreeDC dc(pdc, rcInvalid);
 
-	if (GetEnabled()) {
+	/*if (GetEnabled()) {
 		int y = rcBounds.bottom - heightNetworkBmps;
 
 		dc.DrawBitmap((networkType == BP) ? IDB_BPS : IDB_BP, 0, y);
 		dc.DrawBitmap((networkType == MBPH) ? IDB_MBPHS : IDB_MBPH, (int) (widthNetworkBmps * 1.1), y);
 		dc.DrawBitmap((networkType == MBP) ? IDB_MBPS : IDB_MBP, (int) (widthNetworkBmps * 2.2), y);
 		if (!cudaRestrictions) dc.DrawBitmap((networkType == MBPHO) ? IDB_MBPHOS : IDB_MBPHO, (int) (widthNetworkBmps * 3.3), y);
-	} else {
+	} else {*/
+	if (!GetEnabled()) {
 		if (networkType == BP || spaceNetwork->layersInfo.Lenght() == 0) {
 			mainNetwork->DrawNetwork(dc, rcBounds);
 		} else {
@@ -382,7 +431,7 @@ void CMBPTopologyCtrl::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcIn
  Purpose : Allow the user to select the network type.
  Version : 1.0.0
 */
-void CMBPTopologyCtrl::OnLButtonDown(UINT nFlags, CPoint point) {
+/*void CMBPTopologyCtrl::OnLButtonDown(UINT nFlags, CPoint point) {
 	network_type newType = networkType;
 
 	if (point.x < widthNetworkBmps) {
@@ -398,7 +447,7 @@ void CMBPTopologyCtrl::OnLButtonDown(UINT nFlags, CPoint point) {
 	ChangeNetworkType(newType);
 	
 	OleControlWithChangeEvent::OnLButtonDown(nFlags, point);
-}
+}*/
 
 /**
  Method  : short CMBPTopologyCtrl::GetNetworkType()
@@ -506,6 +555,8 @@ void CMBPTopologyCtrl::OnEnabledChanged() {
 	if (!mainNetwork.IsNull()) {
 		mainNetwork->ShowWindow((GetEnabled()) ? SW_SHOW : SW_HIDE);
 		spaceNetwork->ShowWindow((GetEnabled() && networkType != BP) ? SW_SHOW : SW_HIDE);
+		for (int b = 0; b < 3; b++) buttonsNetworkTopology[b]->ShowWindow((GetEnabled()) ? SW_SHOW : SW_HIDE);
+		buttonsNetworkTopology[MBPHO]->ShowWindow((GetEnabled() && !cudaRestrictions) ? SW_SHOW : SW_HIDE);
 	}
 	
 	OleControlWithChangeEvent::OnEnabledChanged();
@@ -585,8 +636,15 @@ void CMBPTopologyCtrl::SetCudaRestrictions(LONG cudaRestrictions) {
 		FireChange();
 	}
 
+	buttonsNetworkTopology[MBPHO]->ShowWindow((GetEnabled() && !cudaRestrictions) ? SW_SHOW : SW_HIDE);
+
 	CheckForInvalidLayersCuda(TRUE);
 	CheckForInvalidLayersCuda(FALSE);
 
 	Invalidate();
+}
+
+BOOL CMBPTopologyCtrl::PreTranslateMessage(MSG* pMsg) {
+	tooltip.RelayEvent(pMsg);
+	return OleControlWithChangeEvent::PreTranslateMessage(pMsg);
 }

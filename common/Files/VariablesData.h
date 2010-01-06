@@ -1,6 +1,6 @@
 /*
 	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
@@ -18,39 +18,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/**
- Class    : VariablesData
- Purpose  : Read the variables data from a file.
- Author   : Noel de Jesus Mendonça Lopes
- Date     : 5 of December of 1999
- Reviewed : 24 of March of 2000
- Version  : 1.3.0
- Comments :
-             ------------------
-            | HandleExceptions |
-             ------------------
-                |   ---------------
-                -->| VariablesData |
-                    ---------------
-*/
 #ifndef VariablesData_h
 #define VariablesData_h
 
 #include "../Pointers/Matrix.h"
 #include "InputFile.h"
 
-class VariablesData : public HandleExceptions {
+class VariablesData : public HandleExceptions { // Read the variables data from a file
 	private :
-		/**
-		 Attribute : Array<CString> names
-		 Purpose   : Contains the names of the variables.
-		*/
 		Array<CString> names;
-
-		/**
-		 Attribute : Matrix<double> data
-		 Purpose   : Contains the the variables data.
-		*/
 		Matrix<double> data;
 
 		/**
@@ -80,12 +56,7 @@ class VariablesData : public HandleExceptions {
 			while (line.Replace(_TEXT("\t\t"), _TEXT("\t"))>0); // Remove double tabs
 		}
 
-		/**
-		 Method   : static int NumberColumsWithData(CString & line)
-		 Purpose  : returns the number of columns in a text line.
-		 Version  : 1.0.2
-		 Comments : the text string will be altered!
-		*/
+		// Warning: The text string will be altered!
 		static int NumberColumsWithData(CString & line) {
 			SeparateColumns(line);
 
@@ -98,6 +69,66 @@ class VariablesData : public HandleExceptions {
 
 			return numberTabs + 1;
 		}
+
+		static void SeparateCSVcolumns(CString & line, CString & separator, ExpandableArray<CString> & rowColumns) {
+			int currentColumn = 0;
+
+			int separatorLength = separator.GetLength();
+			int length = line.GetLength();
+
+			bool beginningOfColumn = true;
+			bool quotedText = false;
+			bool hadQuotedText = false;
+
+			for(int c = 0; c < length; c++) {
+				TCHAR ch = line[c];
+
+				if (beginningOfColumn) {
+					if (isspace(ch)) continue;
+					
+					beginningOfColumn = false;
+					if (ch == '"') {
+						quotedText = true;
+						continue;
+					}
+				}
+				
+
+				if (quotedText) {
+					if (ch == '"') {
+						if (length > c + 1 && line[c + 1] == '"') {
+							c++;
+						} else {
+							quotedText = false;
+							hadQuotedText = true;
+							continue;
+						}
+					}
+				} else {
+					bool isSeparator = true;
+					for (int l = 0; l < separatorLength; l++) {
+						if (line[c + l] != separator[l]) {
+							isSeparator = false;
+							break;
+						}
+					}
+
+					if (isSeparator) {					
+						if (!hadQuotedText) rowColumns[currentColumn].TrimRight();
+						currentColumn++;
+						c += separatorLength - 1;
+
+						beginningOfColumn = true;
+						hadQuotedText = false;
+						continue;
+					}
+				}
+
+				rowColumns[currentColumn] += ch;
+			}
+		}
+
+		void ReadFromCSVfile(InputFile & f);
 
 	public :
 		/**
@@ -112,11 +143,6 @@ class VariablesData : public HandleExceptions {
 		*/
 		//Array<double> newMaximum;
 
-  		/**
-		 Method  : void Read(CString filename)
-		 Purpose : Read the data from the file <filename>.
-		 Version : 1.0.2
-		*/
 		void Read(CString filename);
 
   		/**

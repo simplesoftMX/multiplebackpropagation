@@ -1,6 +1,6 @@
 /*
 	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
@@ -20,6 +20,6 @@
 
 // Comments: For Visual Studio 2008 an empty line is needed at the end of this file
 #ifndef MBP_VERSION
-	#define MBP_VERSION "Multiple Back-Propagation Version 2.1.1 (beta)"
-	#define MBP_VERSION_BUILD "2.1.1.1"
+	#define MBP_VERSION "Multiple Back-Propagation Version 2.1.2"
+	#define MBP_VERSION_BUILD "2.1.2.1"
 #endif

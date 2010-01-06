@@ -18,26 +18,35 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MBP_CUDA_INIT_H
-#define MBP_CUDA_INIT_H
+#ifndef LocaleInformation_h
+#define LocaleInformation_h
 
-#include <cuda_runtime.h>
+// WARNING: This value works only for LOCALE_SDECIMAL and LOCALE_STHOUSAND
+#define MAX_SIZE_LOCALE_INFORMATION (4)
 
-// COMMENTS : Initialize a CUDA device. For now a single device is used. In the future multiple devices will be allowed.
-class Cuda {
-    private:
-        cudaDeviceProp deviceProperties;
-        int numberDevices;
-        int device;
+class LocaleInformation {
+	public:
+		static CString GetLocaleInformation(LCTYPE desiredInformation, char * defaultValue) {
+			WCHAR information[MAX_SIZE_LOCALE_INFORMATION];
 
-    public:
-        Cuda();
-        
-        bool Supported() { return device < numberDevices; }
+			if (!GetLocaleInfoEx(LOCALE_NAME_USER_DEFAULT, desiredInformation, information, MAX_SIZE_LOCALE_INFORMATION)) {
+				return CString(defaultValue);
+			}
 
-		/*int MaxThreadsPerBlock() {
-			return deviceProperties.maxThreadsPerBlock;
-		}*/
+			return information;
+		}
+
+		static CString GetDecimalSeparator() {
+			return GetLocaleInformation(LOCALE_SDECIMAL, ".");
+		}
+
+		static CString GetListSeparator() {
+			return GetLocaleInformation(LOCALE_SLIST, ",");
+		}
+
+		static CString GetThousandsSeparator() {
+			return GetLocaleInformation(LOCALE_STHOUSAND, ",");
+		}
 };
 
 #endif

@@ -1,6 +1,6 @@
 /*
 	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
@@ -109,7 +109,7 @@ const int CMBackPropDlg::maxPointsRMS = 512;
 CMBackPropDlg::CMBackPropDlg() : CDialog(CMBackPropDlg::IDD) {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
-	#ifdef MBP_WITH_CUDA
+	#ifdef MBP_WITH_CUDA		
 		useCuda = cuda.Supported();
 	#else
 		bool useCuda = false;
@@ -920,15 +920,6 @@ bool CMBackPropDlg::CreateNetwork() {
 	}
 }
 
-/**
- Method   : bool CMBackPropDlg::LoadTrainingData(bool warnUser)
- Purpose  : Load data from the training file, only if it is not loaded yet.
-            Returns true if the training data could be successfuly obtained.
- Version  : 1.3.0
- Comments : If the training file is allready in the memory this method
-            will determine if the file has change since it was readed. 
-						If so the file will be read again.
-*/
 bool CMBackPropDlg::LoadTrainingData(bool warnUser) {
 	bool successfull;
 
@@ -950,6 +941,7 @@ bool CMBackPropDlg::LoadTrainingData(bool warnUser) {
 			if (CFile::GetStatus(trainFileName, fileStatus)) m_trainFileBox.SetFileName(trainFileName);
 		}
 
+		// will only read the data if the associated file has changed since it was first readed.
 		if (lastTimeTrainingDataWasModified != fileStatus.m_mtime) {
 			lastTimeTrainingDataWasModified = fileStatus.m_mtime;
 			reloadTrainingData = true;
@@ -1060,15 +1052,6 @@ bool CMBackPropDlg::LoadTrainingData(bool warnUser) {
 	return successfull;
 }
 
-/**
- Method   : bool CMBackPropDlg::LoadTestingData(bool warnUser)
- Purpose  : Load data from the testing file, only if it is not loaded yet.
-            Returns true if the testing data could be successfuly obtained.
- Version  : 1.4.0
- Comments : If the testing file is allready in the memory this method
-            will determine if the file has change since it was readed. 
-						If so the file will be read again.
-*/
 bool CMBackPropDlg::LoadTestingData(bool warnUser) {
 	bool successfull = true;
 
@@ -1076,7 +1059,7 @@ bool CMBackPropDlg::LoadTestingData(bool warnUser) {
 
 	if (testFileName.IsEmpty()) {
 		testVariables.Clear();
-	} else {
+	} else {		
 		CFileStatus fileStatus;
 		if (!CFile::GetStatus(testFileName, fileStatus)) {
 			// Replace the path
@@ -1088,6 +1071,7 @@ bool CMBackPropDlg::LoadTestingData(bool warnUser) {
 			if (CFile::GetStatus(testFileName, fileStatus)) m_testFileBox.SetFileName(testFileName);			
 		}
 
+		// will only read the data if the associated file has changed since it was first readed.
 		if (lastTimeTestingDataWasModified != fileStatus.m_mtime) {
 			lastTimeTestingDataWasModified = fileStatus.m_mtime;
 			reloadTestingData = true;

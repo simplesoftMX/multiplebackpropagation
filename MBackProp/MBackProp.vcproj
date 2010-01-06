@@ -210,7 +210,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="$(CUDA_INC_PATH);$(NVSDKCUDA_ROOT)\common\inc"
+				AdditionalIncludeDirectories=".;$(CUDA_INC_PATH);$(NVSDKCUDA_ROOT)\common\inc"
 				AdditionalUsingDirectories="..\MBPGrid\bin\Release"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
@@ -294,7 +294,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="$(CUDA_INC_PATH);$(NVSDKCUDA_ROOT)\common\inc"
+				AdditionalIncludeDirectories=".;$(CUDA_INC_PATH);$(NVSDKCUDA_ROOT)\common\inc"
 				AdditionalUsingDirectories="..\MBPGrid\bin\Release"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
@@ -663,6 +663,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\Pointers\Array.h"
+				>
+			</File>
+			<File
 				RelativePath=".\backpropagation.h"
 				>
 			</File>
@@ -699,6 +703,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\Pointers\ExpandableArray.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GenerateCCodeDialog.h"
 				>
 			</File>
@@ -724,6 +732,10 @@
 			</File>
 			<File
 				RelativePath=".\LoadWeightsDialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\Locale\LocaleInformation.h"
 				>
 			</File>
 			<File

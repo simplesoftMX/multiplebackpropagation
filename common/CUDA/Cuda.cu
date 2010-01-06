@@ -1,6 +1,6 @@
 /*
 	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
@@ -18,37 +18,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/**
- Class    : Cuda
- Purpose  : Initialize a CUDA device
- Date     : 13 of March of 2009
- Reviewed : 1 September 2009
- Version  : 1.0.0
- Comments : For now a single device will be used. No more comments for now.
-*/
-
-//#include <stdio.h>
-//#include <stdlib.h>
 #include "cuda.h"
-//#include <cutil.h>
 
-/*#if __DEVICE_EMULATION__
+#if __DEVICE_EMULATION__
 
     Cuda::Cuda() {
         numberDevices = 1;
         device = 0;
     }
     
-#else*/
+#else
 
     Cuda::Cuda() {
+		device = 0;
 	    if (cudaGetDeviceCount(&numberDevices) != cudaSuccess) numberDevices = 0;
 	    
-	    for(device = 0; device < numberDevices; device++) {
-		    if(cudaGetDeviceProperties(&deviceProperties, device) == cudaSuccess && deviceProperties.major >= 1) {
+	    for(; device < numberDevices; device++) {
+		    if(cudaGetDeviceProperties(&deviceProperties, device) == cudaSuccess && deviceProperties.major >= 1 && deviceProperties.major != 9999) { // 9999 - Emulation
 		        if (cudaSetDevice(device) == cudaSuccess) break;
 		    }
 	    }
     }
 
-//#endif
+#endif

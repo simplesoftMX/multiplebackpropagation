@@ -1,6 +1,6 @@
 /*
 	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
@@ -19,13 +19,105 @@
 */
 
 #include "stdafx.h"
-#include "VariablesData.h"
 
-/**
- Method  : void Read(CString filename)
- Purpose : Read the data from the file <filename>.
- Version : 1.0.2
-*/
+#include <regex>
+
+#include "VariablesData.h"
+#include "../Common/Locale/LocaleInformation.h"
+#include "../Common/Pointers/Array.h"
+
+using std::tr1::regex_match;
+using std::tr1::wregex;
+
+void VariablesData::ReadFromCSVfile(InputFile & f) {
+	CString listSeparator = LocaleInformation::GetListSeparator();
+	CString decimalSeparator = LocaleInformation::GetDecimalSeparator();
+
+	wregex regexFloatingPointNumber(L"[-\\+]?([0-9]+\\.?[0-9]*|\\.[0-9]+)([eE][-\\+]?[0-9]+)?");
+
+	int currentLine = 0;
+	int columns = 7;
+	int rows = 0;
+	CString line;
+
+	ExpandableArray<Array<double>> rowsData(100, 0.5f, 100);
+
+	while (f.ReadLine(line)) {
+		currentLine++;
+
+		if(line.TrimRight().IsEmpty()) continue;
+
+		ExpandableArray<CString> rowColumns(columns);
+		SeparateCSVcolumns(line, listSeparator, rowColumns);
+
+		int numberRowColumns = rowColumns.Length();
+
+		if (rows == 0) {
+			columns = numberRowColumns;
+
+			names.Resize(columns);
+			maximum.Resize(columns);
+			minimum.Resize(columns);
+			newMinimum.Resize(columns);
+		} else if (columns != numberRowColumns) {
+			CString s;
+			s.Format(L"Line %d: Columns do not remain constant. Can not recognize the format of file «", currentLine);
+			throw Exception<VariablesData>(s + f.GetFileName() + L"».", this);
+		}
+
+		// Check if columns are valid
+		bool columnsHaveOnlyNumbers = true;
+
+		for(int col = 0; col < columns; col++) {
+			CString s = rowColumns[col];
+			s.Replace(decimalSeparator, L".");
+
+			if (!regex_match((LPCTSTR)s, regexFloatingPointNumber)) {
+				if(rows != 0) {
+					CString s;
+					s.Format(L"Line %d, Column %d: Invalid number. Can not recognize the format of file «", currentLine, col + 1);
+					throw Exception<VariablesData>(s + f.GetFileName() + L"».", this);
+				}
+				
+				columnsHaveOnlyNumbers = false;
+				break;
+			}
+		}
+
+		if (columnsHaveOnlyNumbers) {
+			int r = rowsData.Length();
+			rowsData[r].Resize(columns);
+
+			for(int col = 0; col < columns; col++) {
+				rowColumns[col].Replace(decimalSeparator, L".");
+
+				double value = StringToDouble(rowColumns[col]);
+
+				rowsData[r][col] = value;
+
+				if (r == 0 || maximum[col] < value) maximum[col] = value;
+				if (r == 0 || minimum[col] > value) minimum[col] = value;
+			}
+		} else {
+			for(int col = 0; col < columns; col++) names[col] = rowColumns[col];
+		}
+	
+		rows++;
+	}
+
+	rows = rowsData.Length();
+
+	if (rows == 0) throw Exception<VariablesData>(L"The file «" + f.GetFileName() + L"» contains no data (or contains only a header line).", this);
+
+	data.Resize(rows, columns);
+
+	for(int r = 0; r < rows; r++) {
+		for(int c = 0; c < columns; c++) {
+			data[r][c] = rowsData[r][c];
+		}
+	}
+}
+
 void VariablesData::Read(CString filename) {
 	bool hasTitleRow = false;
 	CString line;
@@ -33,6 +125,11 @@ void VariablesData::Read(CString filename) {
 
 	InputFile f(filename);
 	f.RetriesBeforeThrowExceptions(RetriesBeforeThrowExceptions());
+
+	if (filename.Right(4).MakeLower() == L".csv") {
+		ReadFromCSVfile(f);
+		return;
+	}
 
 	// Analize data and count the number of rows.
 	int rows = 0;
@@ -53,7 +150,9 @@ void VariablesData::Read(CString filename) {
 		TCHAR previousChar ='\t';
 		int lenght = line.GetLength();
 		for(c = 0; c < lenght; c++) {
-			TCHAR actualChar   = line[c];
+			TCHAR actualChar = line[c];
+			if (actualChar == 'e') actualChar = 'E';
+
 			bool charIsInvalid = false;
 
 			switch(actualChar) {

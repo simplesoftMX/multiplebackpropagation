@@ -21,7 +21,7 @@
 #ifndef LocaleInformation_h
 #define LocaleInformation_h
 
-// WARNING: This value works only for LOCALE_SDECIMAL and LOCALE_STHOUSAND
+// WARNING: This value works only for LOCALE_SDECIMAL and LOCALE_STHOUSAND and LOCALE_SLIST
 #define MAX_SIZE_LOCALE_INFORMATION (4)
 
 class LocaleInformation {
@@ -29,7 +29,7 @@ class LocaleInformation {
 		static CString GetLocaleInformation(LCTYPE desiredInformation, char * defaultValue) {
 			WCHAR information[MAX_SIZE_LOCALE_INFORMATION];
 
-			if (!GetLocaleInfoEx(LOCALE_NAME_USER_DEFAULT, desiredInformation, information, MAX_SIZE_LOCALE_INFORMATION)) {
+			if (!GetLocaleInfo(LOCALE_NAME_USER_DEFAULT, desiredInformation, information, MAX_SIZE_LOCALE_INFORMATION)) {
 				return CString(defaultValue);
 			}
 

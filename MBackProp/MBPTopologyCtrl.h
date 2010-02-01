@@ -79,6 +79,16 @@ class MBPTopologyControl : public MBPTopology {
 		 Purpose : Create the MBPTopology control.
 		*/
 		BOOL Create(const RECT& rect, CWnd* pParentWnd);
+
+		long GetInputs() {
+			return GetNeurons(0, true);
+		}
+
+		long GetOutputs() {
+			long lastLayer = GetLayers(true) - 1;
+
+			return (lastLayer > 0) ? GetNeurons(lastLayer, true) : 0;
+		}
 };
 
 #endif

@@ -33,7 +33,10 @@
 
 	#define CUDA_EXP expf
 	#define CUDA_SQRT sqrtf
-#else
+
+	#define CUDA_TANH tanhf
+	#define CUDA_COSH coshf
+#else // Not yet implemented 
 	#define CUDA_FLOATING_TYPE double
 	
     //#define CUDA_VALUE(X) (Xf)

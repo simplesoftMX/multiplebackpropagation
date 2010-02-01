@@ -128,8 +128,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(CUDA_INC_PATH);$(NVSDKCUDA_ROOT)\common\inc"
-				AdditionalUsingDirectories="..\NoelGrid\bin\Release"
+				AdditionalIncludeDirectories=".;$(CUDA_INC_PATH);$(NVSDKCUDA_ROOT)\common\inc"
+				AdditionalUsingDirectories="..\MBPGrid\bin\Release"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"

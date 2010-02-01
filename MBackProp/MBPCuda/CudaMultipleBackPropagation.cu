@@ -201,7 +201,7 @@ CudaMultipleBackPropagation::CudaMultipleBackPropagation(Pointer <MultipleBackPr
 		lastDeltaLayers[ll] = l->lastDelta.Pointer();
 		lastDeltaWithoutLMlayers[ll] = l->lastDeltaWithoutLearningMomentum.Pointer();
 
-		l++;
+		ll++;
 	}
 	for(DeviceLayer * l = layers.First(); l != NULL; l = layers.Next()) {
 		numberWeightsLayer[ll] = l->connections;
@@ -211,7 +211,7 @@ CudaMultipleBackPropagation::CudaMultipleBackPropagation(Pointer <MultipleBackPr
 		lastDeltaLayers[ll] = l->lastDelta.Pointer();
 		lastDeltaWithoutLMlayers[ll] = l->lastDeltaWithoutLearningMomentum.Pointer();
 
-		l++;
+		ll++;
 	}
 
 	d_numberWeightsLayer = new DeviceArray<int>(numberWeightsLayer);
@@ -256,22 +256,6 @@ CudaMultipleBackPropagation::~CudaMultipleBackPropagation() {
 }
 
 void CudaMultipleBackPropagation::Train(double momentum, double spaceMomentum, bool robustLearning, double rmsGrowToApplyRobustLearning, double robustFactor) {
-//DeviceLayer * dl = layers.First();
-//ShowArrayInfo(dl->weights, 14, 0);
-//return;
-
-//DeviceLayer * fl = layers.First();
-//ShowArrayInfo(fl->weights, 7, 7);
-
-/*				DeviceArray<CUDA_FLOATING_TYPE> weights;
-				DeviceArray<CUDA_FLOATING_TYPE> bestWeights;
-				DeviceArray<CUDA_FLOATING_TYPE> learnRate;
-				DeviceArray<CUDA_FLOATING_TYPE> lastDelta;
-				DeviceArray<CUDA_FLOATING_TYPE> lastDeltaWithoutLearningMomentum;
-				DeviceArray<CUDA_FLOATING_TYPE> outputs;
-				DeviceArray<CUDA_FLOATING_TYPE> localGradient;*/
-
-
 	/*******
     Determine the network outputs
     *******/

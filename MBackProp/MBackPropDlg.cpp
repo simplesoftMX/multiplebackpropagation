@@ -391,7 +391,12 @@ UINT CMBackPropDlg::TrainNetwork(LPVOID pParam) {
 	CMBackPropDlg * bpDlg = (CMBackPropDlg *) pParam;
 
 	#ifdef MBP_WITH_CUDA
-	if(bpDlg->useCuda) bpDlg->mbpCuda = new CudaMultipleBackPropagation(bpDlg->mbp, bpDlg->trainInputPatterns, bpDlg->trainDesiredOutputPatterns);
+
+	if(bpDlg->useCuda) {
+		bpDlg->mbpCuda = new CudaMultipleBackPropagation(bpDlg->mbp, bpDlg->trainInputPatterns, bpDlg->trainDesiredOutputPatterns);
+		if (bpDlg->rmsInterval < 8) bpDlg->rmsInterval = 8;
+	}
+
 	#endif
 
 	while (!bpDlg->stopTrain) {
@@ -433,10 +438,15 @@ void CMBackPropDlg::TrainOneEpochUsingCuda() {
 
 	epochTrainingTime += clock() - initialTime;
 
-	if (rms != last_rms) {
+	if (rms == 1.0) {
+		rms = last_rms;
+	} else if (rms != last_rms) {
 		s.Format(_TEXT("%1.10f"), rms);
 		trainRMSDisplay.SetWindowText(s);
 		last_rms = rms;
+
+		s.Format(L"%d", epoch);
+		epochDisplay.SetWindowText(s);
 	}
 
 	if ((epoch % rmsInterval) == 0) {
@@ -953,15 +963,9 @@ bool CMBackPropDlg::LoadTrainingData(bool warnUser) {
 			reloadTrainingData = false;
 		}
 		successfull = true;
-	} catch (Exception<VariablesData> e) {
-		if (warnUser) {
-			if (!e.UserWasInformed()) WarnUser(e.Cause() + _TEXT(" The tool 'Data Pre-Processing Tool for Neural Networks' can be used in order to generate training and test files."), _TEXT("Invalid Train File"));
-			m_trainFileBox.SetFocus();
-		}
-		successfull = false;
 	} catch (BasicException e) {
 		if (warnUser) {
-			if (!e.UserWasInformed()) WarnUser(e.Cause() + _TEXT(" The tool 'Data Pre-Processing Tool for Neural Networks' can be used in order to generate training and test files."), _TEXT("Invalid Train File"));
+			if (!e.UserWasInformed()) WarnUser(e.Cause(), L"Invalid Train File");
 			m_trainFileBox.SetFocus();
 		}
 		successfull = false;
@@ -970,8 +974,8 @@ bool CMBackPropDlg::LoadTrainingData(bool warnUser) {
 	if (!warnUser) trainVariables.RetriesBeforeThrowExceptions(HandleExceptions::DefaultRetriesBeforeThrowExceptions());
 
 	if (successfull) {
-		int inputs  = mbp->Inputs();
-		int outputs = mbp->Outputs();
+		int inputs = MBPTopologyCtrl->GetInputs();
+		int outputs = MBPTopologyCtrl->GetOutputs();
 
 		if (trainVariables.Number() == inputs + outputs) {
 			int trainPatterns = trainVariables.Columns();
@@ -1084,7 +1088,7 @@ bool CMBackPropDlg::LoadTestingData(bool warnUser) {
 				reloadTestingData = false;
 			} catch (BasicException e) {
 				if (warnUser) {
-					if (!e.UserWasInformed()) WarnUser(e.Cause() + _TEXT(" The tool 'Data Pre-Processing Tool for Neural Networks' can be used in order to generate training and test files."), _TEXT("Invalid Test File"));
+					if (!e.UserWasInformed()) WarnUser(e.Cause(), L"Invalid Test File");
 					m_testFileBox.SetFocus();
 				}
 				successfull = false;
@@ -1095,8 +1099,8 @@ bool CMBackPropDlg::LoadTestingData(bool warnUser) {
 	if (!warnUser) testVariables.RetriesBeforeThrowExceptions(HandleExceptions::DefaultRetriesBeforeThrowExceptions());
 
 	if (successfull) {
-		int inputs  = mbp->Inputs();
-		int outputs = mbp->Outputs();
+		int inputs = MBPTopologyCtrl->GetInputs();
+		int outputs = MBPTopologyCtrl->GetOutputs();
 
 		if (testVariables.Number() ==  inputs + outputs) {
 			int testPatterns = testVariables.Columns();
@@ -1356,18 +1360,21 @@ void CMBackPropDlg::OnSelchangeTab(NMHDR * pNMHDR, LRESULT * pResult) {
 			MBPTopologyCtrl->ShowWindow(SW_HIDE);
 			RMSGraphic->ShowWindow(SW_HIDE);
 
+			if (trainingThread == NULL) {
+				if (reloadTestingData) LoadTrainingTestDataIfPossible(false);
+				reloadTrainingData = true;
+			}
+
+			testingOutputGraphic->ShowWindow(SW_HIDE);
+
 			#ifdef MBP_WITH_CUDA
 			if (trainingThread == NULL || !useCuda)
 			#endif
 			{
-				if (reloadTestingData) LoadTrainingTestDataIfPossible(false);
-				reloadTrainingData = true;
-
+				comboOutput->ShowWindow(SW_SHOW);
 				comboOutput->SetFocus();
-				comboOutput->ShowWindow(SW_SHOW);			
-				trainingOutputGraphic->Invalidate();
 				trainingOutputGraphic->ShowWindow(SW_SHOW);
-				testingOutputGraphic->ShowWindow(SW_HIDE);
+				trainingOutputGraphic->Invalidate();
 			}
 			break;
 
@@ -1375,18 +1382,21 @@ void CMBackPropDlg::OnSelchangeTab(NMHDR * pNMHDR, LRESULT * pResult) {
 			MBPTopologyCtrl->ShowWindow(SW_HIDE);
 			RMSGraphic->ShowWindow(SW_HIDE);
 
-			#ifdef MBP_WITH_CUDA
-			if (trainingThread == NULL || !useCuda)
-			#endif
-			{
+			if (trainingThread == NULL) {
 				if (reloadTestingData || reloadTrainingData) {
 					LoadTrainingTestDataIfPossible(false);
 					if (tabs.GetCurFocus() == tabTopology) break;
 				}
+			}
 
+			trainingOutputGraphic->ShowWindow(SW_HIDE);
+
+			#ifdef MBP_WITH_CUDA
+			if (trainingThread == NULL || !useCuda)
+			#endif
+			{
 				comboOutput->ShowWindow(SW_SHOW);
 				comboOutput->SetFocus();
-				trainingOutputGraphic->ShowWindow(SW_HIDE);
 				testingOutputGraphic->ShowWindow(SW_SHOW);
 				testingOutputGraphic->Invalidate();
 			}
@@ -2066,7 +2076,7 @@ void CMBackPropDlg::OutputChanged(int newOutput) {
 	int variables = inputs + mbp->Outputs();
 
 	trainingOutputGraphic->Clear();
-	if (trainVariables.Number() == variables) {
+	if (trainVariables.Number() == variables && newOutput >= 0) {
 		originalMinimum = trainVariables.Minimum(inputs + newOutput);
 		originalMaximum = trainVariables.Maximum(inputs + newOutput);
 		actualMinimum = trainVariables.newMinimum[inputs + newOutput];
@@ -2084,7 +2094,7 @@ void CMBackPropDlg::OutputChanged(int newOutput) {
 	}
 
 	testingOutputGraphic->Clear();
-	if (testVariables.Number() == variables) {
+	if (testVariables.Number() == variables && newOutput >= 0) {
 		testingOutputGraphic->InsertLine(desiredTestOutputs[newOutput].Pointer(), _TEXT("Desired Output"));
 		testingOutputGraphic->InsertLine(networkTestOutputs[newOutput].Pointer(), _TEXT("Network Output"));
 		testingOutputGraphic->Rescale(originalMinimum, originalMaximum, actualMinimum, 1.0);

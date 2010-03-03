@@ -25,19 +25,19 @@
 
 #include "../../Common/CUDA/CudaDefinitions.h"
 
-KERNEL FireLayer(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * outputs);
-KERNEL FireOutputLayer(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * desiredOutputs, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * localGradientSpaceNet);
+KERNEL FireLayer(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * outputs);
+KERNEL FireOutputLayer(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * desiredOutputs, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * localGradientSpaceNet);
 
 //MAXIMIZE_INPUTS_ALLOWED / MAXIMIZE_CONNECTIONS_ALLOWED
-void KernelFireLayer(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * outputs, int numInputs);
-void KernelFireOutputLayer(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * desiredOutputs, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * localGradientSpaceNet, int numInputs);
+void KernelFireLayer(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * outputs, int numInputs);
+void KernelFireOutputLayer(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * desiredOutputs, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * localGradientSpaceNet, int numInputs);
 
 
 void KernelCalculateRMS(cudaStream_t stream, int blockSize, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * rmsOut, int numberPatterns, CUDA_FLOATING_TYPE numberPatternsNeurons);
 
 KERNEL RobustLearning(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, int layers, int * numberWeights, CUDA_FLOATING_TYPE ** weights, CUDA_FLOATING_TYPE ** bestWeights, CUDA_FLOATING_TYPE ** learningRate, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE ** lastDeltaWithoutLearningMomentum, CUDA_FLOATING_TYPE ** lastDelta);
 
-KERNEL CalculateLocalGradient(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * localGradientNextLayer, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * localGradientSpaceNet);
+KERNEL CalculateLocalGradient(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * localGradientNextLayer, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * localGradientSpaceNet);
 
 void KernelCorrectLayerWeights(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * learningRate, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentum, CUDA_FLOATING_TYPE * lastDelta, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE momentum, int numberPatterns);
 

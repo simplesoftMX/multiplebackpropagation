@@ -60,7 +60,7 @@ __device__ void SumInputWeight(int connection, CUDA_FLOATING_TYPE * inputs, CUDA
     }
 }
 
-KERNEL FireLayer(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * outputs) {
+KERNEL FireLayer(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * outputs) {
     extern __shared__ CUDA_FLOATING_TYPE iw[];
     
 	int connection = NEURON * NUM_INPUTS_INCLUDING_BIAS + INPUT;
@@ -75,12 +75,12 @@ KERNEL FireLayer(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA
 		int n = PATTERN * NUM_NEURONS + NEURON;
 
 		CUDA_FLOATING_TYPE output = CUDA_SIGMOID(iw[THREAD_ID]);
-		if (m != NULL) output *= m[n];
+		if (m != NULL) output *= m[PATTERN * totalNeuronsWithSelectiveActivation + NEURON + mOffset];
 		outputs[n] = output;
 	}
 }
 
-KERNEL FireOutputLayer(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * desiredOutputs, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * localGradientSpaceNet) {
+KERNEL FireOutputLayer(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * desiredOutputs, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * localGradientSpaceNet) {
     extern __shared__ CUDA_FLOATING_TYPE iw[]; 
 
 	int connection = NEURON * NUM_INPUTS_INCLUDING_BIAS + INPUT;
@@ -98,14 +98,15 @@ KERNEL FireOutputLayer(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights
 
 	if (INPUT == 0) {
         int n = blockIdx.x * NUM_NEURONS + NEURON; /* blockIdx.x -> PATTERN */
+		int nSelAct = PATTERN * totalNeuronsWithSelectiveActivation + NEURON + mOffset;
 
 		CUDA_FLOATING_TYPE output = CUDA_SIGMOID(iw[THREAD_ID]);
-        CUDA_FLOATING_TYPE M = (m != NULL) ? m[n] : CUDA_VALUE(1.0);
+        CUDA_FLOATING_TYPE M = (m != NULL) ? m[nSelAct] : CUDA_VALUE(1.0);
         CUDA_FLOATING_TYPE outn = output * M;
         
 		CUDA_FLOATING_TYPE error = (desiredOutputs[n] - outn);
         
-        if (m != NULL) localGradientSpaceNet[n] = error * output * CUDA_SIGMOID_DERIVATE(M);
+        if (m != NULL) localGradientSpaceNet[nSelAct] = error * output * CUDA_SIGMOID_DERIVATE(M);
         
         outputs[n] = outn;
 		localGradient[n] = error * M * CUDA_SIGMOID_DERIVATE(output);

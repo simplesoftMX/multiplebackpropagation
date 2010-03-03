@@ -31,7 +31,7 @@
 
 #define PATTERN blockIdx.x
 
-KERNEL CalculateLocalGradient(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * localGradientNextLayer, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * localGradientSpaceNet) {
+KERNEL CalculateLocalGradient(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * localGradientNextLayer, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * localGradientSpaceNet) {
     extern __shared__ CUDA_FLOATING_TYPE lg[];
     
 	if (bestRMS != NULL) {
@@ -47,10 +47,10 @@ KERNEL CalculateLocalGradient(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * be
             
     if (NEURON == 0) lgNextLayer[OUTPUT_NEURON] = localGradientNextLayer[PATTERN * NUM_OUTPUTS + OUTPUT_NEURON];
     
-    int connection = OUTPUT_NEURON * NUM_INPUTS_OUTPUT_NEURON + NEURON + 1;    
+    int connection = OUTPUT_NEURON * NUM_INPUTS_OUTPUT_NEURON + NEURON + 1;
     int threadId = (NEURON * NUM_OUTPUTS + OUTPUT_NEURON);
     
-    __syncthreads();    
+    __syncthreads();
     
     lg[threadId] = weights[connection] * lgNextLayer[OUTPUT_NEURON];
     __syncthreads();
@@ -75,12 +75,14 @@ KERNEL CalculateLocalGradient(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * be
         CUDA_FLOATING_TYPE lgn = lg[threadId];
     
         if (m != NULL) {
-            CUDA_FLOATING_TYPE M = m[n];
+			int nSelAct = PATTERN * totalNeuronsWithSelectiveActivation + NEURON + mOffset;
+
+            CUDA_FLOATING_TYPE M = m[nSelAct];
             if (M == CUDA_VALUE(0.0)) {
-                localGradientSpaceNet[n] = CUDA_VALUE(0.0);
+                localGradientSpaceNet[nSelAct] = CUDA_VALUE(0.0);
             } else {
                 Fh = Fh / M;
-                localGradientSpaceNet[n] = lgn * Fh * CUDA_SIGMOID_DERIVATE(M);
+                localGradientSpaceNet[nSelAct] = lgn * Fh * CUDA_SIGMOID_DERIVATE(M);
             }
             lgn *= M;
         }

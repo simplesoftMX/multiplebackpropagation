@@ -424,11 +424,13 @@ void CMBackPropDlg::TrainOneEpochUsingCuda() {
 	clock_t initialTime = clock();
 	clock_t epochTrainingTime = 0;
 
-	static double last_rms = 1.0;
+	static double last_rms;
 	double space_rms = 0.0;
 	double rms;
 	
 	CString s;
+
+	if (epoch == 0) last_rms = 1.0;
 
 	++epoch;
 

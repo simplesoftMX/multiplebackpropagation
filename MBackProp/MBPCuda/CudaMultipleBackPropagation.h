@@ -45,6 +45,8 @@ class CudaMultipleBackPropagation {
 			friend class CudaMultipleBackPropagation;
 
 			private:
+				static int neuronsWithSelectiveActivation;
+
 				int patterns;
 				int neurons;
 				int inputs;
@@ -62,6 +64,7 @@ class CudaMultipleBackPropagation {
 				CUDA_FLOATING_TYPE * inputValues;
 				CUDA_FLOATING_TYPE * desOutputs;
 				CUDA_FLOATING_TYPE * m;
+				int mOffset;				
 
 				CUDA_FLOATING_TYPE * lgSpaceNet;
 				CUDA_FLOATING_TYPE * rms;
@@ -76,10 +79,11 @@ class CudaMultipleBackPropagation {
 
 				bool isOutputLayer;
 			public:
-				DeviceLayer(HostArray<CUDA_FLOATING_TYPE> & hweights, HostArray<CUDA_FLOATING_TYPE> & hlearnRate, HostArray<CUDA_FLOATING_TYPE> & hlastDelta, HostArray<CUDA_FLOATING_TYPE> & hlastDeltaWithoutLearningMomentum, DeviceArray<CUDA_FLOATING_TYPE> * layerInputs, int inputs, int neurons, int nextLayerNeurons, int patterns, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * lgSpaceNet) : weights(hweights), learnRate(hlearnRate), lastDelta(hlastDelta), lastDeltaWithoutLearningMomentum(hlastDeltaWithoutLearningMomentum), outputs(neurons * patterns), localGradient(neurons * patterns), dimNeuronsPatterns(neurons, patterns), dimInputsNeurons(inputs, neurons), bestWeights(hweights.Lenght()), dimOutputsNeurons(nextLayerNeurons, neurons) {
+				DeviceLayer(HostArray<CUDA_FLOATING_TYPE> & hweights, HostArray<CUDA_FLOATING_TYPE> & hlearnRate, HostArray<CUDA_FLOATING_TYPE> & hlastDelta, HostArray<CUDA_FLOATING_TYPE> & hlastDeltaWithoutLearningMomentum, DeviceArray<CUDA_FLOATING_TYPE> * layerInputs, int inputs, int neurons, int nextLayerNeurons, int patterns, CUDA_FLOATING_TYPE * m, int mOffset, CUDA_FLOATING_TYPE * lgSpaceNet) : weights(hweights), learnRate(hlearnRate), lastDelta(hlastDelta), lastDeltaWithoutLearningMomentum(hlastDeltaWithoutLearningMomentum), outputs(neurons * patterns), localGradient(neurons * patterns), dimNeuronsPatterns(neurons, patterns), dimInputsNeurons(inputs, neurons), bestWeights(hweights.Lenght()), dimOutputsNeurons(nextLayerNeurons, neurons) {
 					connections = hweights.Lenght();
 
 					this->m = m;
+					this->mOffset = mOffset;
 					this->lgSpaceNet = lgSpaceNet;
 
 					this->inputs = inputs;					

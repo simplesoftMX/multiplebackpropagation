@@ -61,24 +61,26 @@ void ShowInfo(int v) {
 
 #endif*/
 
+int CudaMultipleBackPropagation::DeviceLayer::neuronsWithSelectiveActivation = 0;
+
 void CudaMultipleBackPropagation::DeviceLayer::Fire(cudaStream_t stream) {
 	if (isOutputLayer) {
 		if(connections > MAX_THREADS_PER_BLOCK) {
-			KernelFireOutputLayer(stream, dimNeuronsPatterns, inputsBlockSize, inputValues, weights.Pointer(), m, desOutputs, outputs.Pointer(), localGradient.Pointer(), rms, lgSpaceNet, inputsWithoutBias);
+			KernelFireOutputLayer(stream, dimNeuronsPatterns, inputsBlockSize, inputValues, weights.Pointer(), m, mOffset, neuronsWithSelectiveActivation, desOutputs, outputs.Pointer(), localGradient.Pointer(), rms, lgSpaceNet, inputsWithoutBias);
 		} else {
-			FireOutputLayer<<<patterns, dimInputsNeurons, sharedMemFire, stream>>>(inputValues, weights.Pointer(), m, desOutputs, outputs.Pointer(), localGradient.Pointer(), rms, lgSpaceNet);
+			FireOutputLayer<<<patterns, dimInputsNeurons, sharedMemFire, stream>>>(inputValues, weights.Pointer(), m, mOffset, neuronsWithSelectiveActivation, desOutputs, outputs.Pointer(), localGradient.Pointer(), rms, lgSpaceNet);
 		}
 	} else {
 		if(connections > MAX_THREADS_PER_BLOCK) {
-			KernelFireLayer(stream, dimNeuronsPatterns, inputsBlockSize, inputValues, weights.Pointer(), m, outputs.Pointer(), inputsWithoutBias);
+			KernelFireLayer(stream, dimNeuronsPatterns, inputsBlockSize, inputValues, weights.Pointer(), m, mOffset, neuronsWithSelectiveActivation, outputs.Pointer(), inputsWithoutBias);
 		} else {
-			FireLayer<<<patterns, dimInputsNeurons, sharedMemFire, stream>>>(inputValues, weights.Pointer(), m, outputs.Pointer());
+			FireLayer<<<patterns, dimInputsNeurons, sharedMemFire, stream>>>(inputValues, weights.Pointer(), m, mOffset, neuronsWithSelectiveActivation, outputs.Pointer());
 		}
 	}
 }
 
 void CudaMultipleBackPropagation::DeviceLayer::CalculateLocalGradient(cudaStream_t stream, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, DeviceLayer * nextLayer) {
-	::CalculateLocalGradient<<<patterns, dimOutputsNeurons, sharedMemGradients, stream>>>(rms, bestRMS, rmsGrowToApplyRobustLearning, outputs.Pointer(), nextLayer->weights.Pointer(), m, nextLayer->localGradient.Pointer(), localGradient.Pointer(), lgSpaceNet);
+	::CalculateLocalGradient<<<patterns, dimOutputsNeurons, sharedMemGradients, stream>>>(rms, bestRMS, rmsGrowToApplyRobustLearning, outputs.Pointer(), nextLayer->weights.Pointer(), m, mOffset, neuronsWithSelectiveActivation, nextLayer->localGradient.Pointer(), localGradient.Pointer(), lgSpaceNet);
 }
 
 void CudaMultipleBackPropagation::DeviceLayer::CorrectWeights(cudaStream_t stream, int patternsBlockSize, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, CUDA_FLOATING_TYPE robustFactor, CUDA_FLOATING_TYPE momentum) {
@@ -95,6 +97,7 @@ void CudaMultipleBackPropagation::CreateDeviceLayers(List<Layer> & hostLayers, L
 
 	CUDA_FLOATING_TYPE * m = (neuronsWithSelectiveActivation == NULL) ? NULL : outputLayerSpaceNetwork->outputs.Pointer();
 	CUDA_FLOATING_TYPE * lgSpaceNet = (neuronsWithSelectiveActivation == NULL) ? NULL : outputLayerSpaceNetwork->localGradient.Pointer();
+	int mOffset = 0;
 	
 	Layer * nextLayer = hostLayers.Next();
 	for (int ln = 1; (l = nextLayer) != NULL; ln++) {
@@ -121,23 +124,17 @@ void CudaMultipleBackPropagation::CreateDeviceLayers(List<Layer> & hostLayers, L
 			}
 		}
 
-		CUDA_FLOATING_TYPE * ml = NULL;
-		CUDA_FLOATING_TYPE * lgSpaceNetl = NULL;
-		if (m != NULL) {	
-			int numberNeuronsWithSelectiveActivation = neuronsWithSelectiveActivation[ln];
-			if(numberNeuronsWithSelectiveActivation > 0) {
-				ml = m;
-				lgSpaceNetl = lgSpaceNet;
-				m += numberNeuronsWithSelectiveActivation;
-				lgSpaceNet += numberNeuronsWithSelectiveActivation;
-			}
-		}
+		int numberNeuronsWithSelectiveActivation =  (m == NULL) ? 0 : neuronsWithSelectiveActivation[ln];
+		CUDA_FLOATING_TYPE * ml = (numberNeuronsWithSelectiveActivation) ? m : NULL;
+		CUDA_FLOATING_TYPE * lgSpaceNetl = (numberNeuronsWithSelectiveActivation) ? lgSpaceNet : NULL;
 
 		nextLayer = hostLayers.Next();
 		int nextLayerNeurons = (nextLayer == NULL) ? 0 : nextLayer->neurons.Lenght();
 
-		DeviceLayer * dl = new DeviceLayer(weights, learningRate, lDelta, lastDeltaWithoutLearningMomentum, layerInputs, inputs, neurons, nextLayerNeurons, patterns, ml, lgSpaceNetl);
+		DeviceLayer * dl = new DeviceLayer(weights, learningRate, lDelta, lastDeltaWithoutLearningMomentum, layerInputs, inputs, neurons, nextLayerNeurons, patterns, ml, mOffset, lgSpaceNetl);
 		deviceLayers.Add(dl);
+
+		mOffset += numberNeuronsWithSelectiveActivation;
 
 		layerInputs = &(dl->outputs);
 		inputsWithoutBias = neurons;
@@ -173,10 +170,10 @@ CudaMultipleBackPropagation::CudaMultipleBackPropagation(Pointer <MultipleBackPr
 	if (!mbp->spaceNetwork.IsNull()) {
 		CreateDeviceLayers(mbp->spaceNetwork->layers, layersSpaceNetwork, patterns, NULL);
 		neuronsWithSelectiveActivation = mbp->neuronsWithSelectiveActivation.Pointer();
+		DeviceLayer::neuronsWithSelectiveActivation = layersSpaceNetwork.Last()->neurons;
 	}
 
 	CreateDeviceLayers(mbp->layers, layers, patterns, neuronsWithSelectiveActivation);
-
 
 	DeviceLayer * dlOut = layers.Last();
 
@@ -252,6 +249,7 @@ CudaMultipleBackPropagation::~CudaMultipleBackPropagation() {
 	cudaStreamDestroy(streamKernels);
 	cudaStreamDestroy(streamRMS);
 
+	*rms = CUDA_VALUE(1.0);
 	cudaFreeHost(rms);
 }
 

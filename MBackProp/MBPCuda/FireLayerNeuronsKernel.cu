@@ -27,7 +27,7 @@
 
 #define PATTERN blockIdx.y
 
-template <int blockSize> KERNEL FireLayerNeurons(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * outputs, int numInputs) {
+template <int blockSize> KERNEL FireLayerNeurons(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * outputs, int numInputs) {
     extern __shared__ CUDA_FLOATING_TYPE iw[];
   
 	iw[threadIdx.x] = CUDA_VALUE(0.0);
@@ -65,15 +65,15 @@ template <int blockSize> KERNEL FireLayerNeurons(CUDA_FLOATING_TYPE * inputs, CU
 		    int n = PATTERN * NUM_NEURONS + NEURON;
 
 		    CUDA_FLOATING_TYPE output = CUDA_SIGMOID(iw[0]);
-		    if (m != NULL) output *= m[n];
+		    if (m != NULL) output *= m[PATTERN * totalNeuronsWithSelectiveActivation + NEURON + mOffset];
 		    outputs[n] = output;
 		}
 	}
 }
 
-#define FIRE_LAYER_NEURONS(X) FireLayerNeurons<X><<<gridSize, blockSize, blockSize * sizeof(CUDA_FLOATING_TYPE), stream>>>(inputs, weights, m, outputs, numInputs)
+#define FIRE_LAYER_NEURONS(X) FireLayerNeurons<X><<<gridSize, blockSize, blockSize * sizeof(CUDA_FLOATING_TYPE), stream>>>(inputs, weights, m, mOffset, totalNeuronsWithSelectiveActivation, outputs, numInputs)
 
-void KernelFireLayer(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * outputs, int numInputs) {
+void KernelFireLayer(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * outputs, int numInputs) {
     switch(blockSize) {
         case 512:
             FIRE_LAYER_NEURONS(512);
@@ -108,7 +108,7 @@ void KernelFireLayer(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_F
     }
 }
 
-template <int blockSize> KERNEL FireOutputLayerNeurons(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * desiredOutputs, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * localGradientSpaceNet, int numInputs) {
+template <int blockSize> KERNEL FireOutputLayerNeurons(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * desiredOutputs, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * localGradientSpaceNet, int numInputs) {
     extern __shared__ CUDA_FLOATING_TYPE iw[];
     
 	iw[threadIdx.x] = CUDA_VALUE(0.0);
@@ -144,14 +144,15 @@ template <int blockSize> KERNEL FireOutputLayerNeurons(CUDA_FLOATING_TYPE * inpu
 
 		if (threadIdx.x == 0) {
 		    int n = PATTERN * NUM_NEURONS + NEURON;
+			int nSelAct = PATTERN * totalNeuronsWithSelectiveActivation + NEURON + mOffset;
 
 		    CUDA_FLOATING_TYPE output = CUDA_SIGMOID(iw[0]);
-		    CUDA_FLOATING_TYPE M = (m != NULL) ? m[n] : CUDA_VALUE(1.0);
+		    CUDA_FLOATING_TYPE M = (m != NULL) ? m[nSelAct] : CUDA_VALUE(1.0);
 		    CUDA_FLOATING_TYPE outn = output * M;
 		    
 		    CUDA_FLOATING_TYPE error = (desiredOutputs[n] - outn);
 		    
-		    if (m != NULL) localGradientSpaceNet[n] = error * output * CUDA_SIGMOID_DERIVATE(M);
+		    if (m != NULL) localGradientSpaceNet[nSelAct] = error * output * CUDA_SIGMOID_DERIVATE(M);
 		    
 		    outputs[n] = outn;
 		    
@@ -162,9 +163,9 @@ template <int blockSize> KERNEL FireOutputLayerNeurons(CUDA_FLOATING_TYPE * inpu
 	}
 }
 
-#define FIRE_OUTPUT_LAYER_NEURONS(X) FireOutputLayerNeurons<X><<<gridSize, blockSize, blockSize * sizeof(CUDA_FLOATING_TYPE), stream>>>(inputs, weights, m, desiredOutputs, outputs, localGradient, rms, localGradientSpaceNet, numInputs)
+#define FIRE_OUTPUT_LAYER_NEURONS(X) FireOutputLayerNeurons<X><<<gridSize, blockSize, blockSize * sizeof(CUDA_FLOATING_TYPE), stream>>>(inputs, weights, m, mOffset, totalNeuronsWithSelectiveActivation, desiredOutputs, outputs, localGradient, rms, localGradientSpaceNet, numInputs)
 
-void KernelFireOutputLayer(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, CUDA_FLOATING_TYPE * desiredOutputs, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * localGradientSpaceNet, int numInputs) {
+void KernelFireOutputLayer(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * desiredOutputs, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * localGradientSpaceNet, int numInputs) {
     switch(blockSize) {
         case 512:
             FIRE_OUTPUT_LAYER_NEURONS(512);

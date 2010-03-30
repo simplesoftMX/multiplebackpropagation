@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -61,3 +61,23 @@ double Connection::u = 1.1;
 double Connection::d = 0.9;
 
 double Connection::maxStepSize = 1.0;
+
+bool Connection::Load(InputFile & f, bool loadAditionalVars) {
+	CString s;
+
+	if (!f.ReadLine(s)) return false;
+	weight = StringToDouble(s);
+
+	if (loadAditionalVars) {
+		if (!f.ReadLine(s)) return false;
+		delta = StringToDouble(s);
+
+		if (!f.ReadLine(s)) return false;
+		deltaWithoutLearningMomentum = StringToDouble(s);
+
+		if (!f.ReadLine(s)) return false;
+		learningRate = StringToDouble(s);
+	}
+
+	return true;
+}

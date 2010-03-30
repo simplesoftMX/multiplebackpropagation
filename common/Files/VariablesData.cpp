@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -29,7 +29,14 @@
 using std::tr1::regex_match;
 using std::tr1::wregex;
 
+#define ROWS_ALLOCATED_CSV_FILE (100)
+#define PERCENTAGE_ROWS_GROW_CSV_FILE (0.5f)
+#define MIN_GROW_ROWS_CSV_FILE (100)
+
 void VariablesData::ReadFromCSVfile(InputFile & f) {
+	const unsigned long lnan[2] = {0xffffffff, 0x7fffffff};
+	const double NotNumber = *(double*) lnan;
+
 	CString listSeparator = LocaleInformation::GetListSeparator();
 	CString decimalSeparator = LocaleInformation::GetDecimalSeparator();
 
@@ -40,7 +47,7 @@ void VariablesData::ReadFromCSVfile(InputFile & f) {
 	int rows = 0;
 	CString line;
 
-	ExpandableArray<Array<double>> rowsData(100, 0.5f, 100);
+	ExpandableArray<Array<double>> rowsData(ROWS_ALLOCATED_CSV_FILE, PERCENTAGE_ROWS_GROW_CSV_FILE, MIN_GROW_ROWS_CSV_FILE);
 
 	while (f.ReadLine(line)) {
 		currentLine++;
@@ -55,10 +62,12 @@ void VariablesData::ReadFromCSVfile(InputFile & f) {
 		if (rows == 0) {
 			columns = numberRowColumns;
 
-			names.Resize(columns);
+			names.Resize(columns);			
 			maximum.Resize(columns);
 			minimum.Resize(columns);
 			newMinimum.Resize(columns);
+			missingValues.Resize(columns);
+			for(int col = 0; col < columns; col++) missingValues[col] = false;
 		} else if (columns != numberRowColumns) {
 			CString s;
 			s.Format(L"Line %d: Columns do not remain constant. Can not recognize the format of file «", currentLine);
@@ -70,6 +79,9 @@ void VariablesData::ReadFromCSVfile(InputFile & f) {
 
 		for(int col = 0; col < columns; col++) {
 			CString s = rowColumns[col];
+			
+			if (s.IsEmpty() || s == L"?") continue; // missing values
+
 			s.Replace(decimalSeparator, L".");
 
 			if (!regex_match((LPCTSTR)s, regexFloatingPointNumber)) {
@@ -89,14 +101,21 @@ void VariablesData::ReadFromCSVfile(InputFile & f) {
 			rowsData[r].Resize(columns);
 
 			for(int col = 0; col < columns; col++) {
-				rowColumns[col].Replace(decimalSeparator, L".");
+				CString & s = rowColumns[col];
 
-				double value = StringToDouble(rowColumns[col]);
+				if (s.IsEmpty() || s == L"?") { // missing values
+					missingValues[col] = true;
+					rowsData[r][col] = NotNumber;
+				} else {
+					s.Replace(decimalSeparator, L".");
 
-				rowsData[r][col] = value;
+					double value = StringToDouble(s);
 
-				if (r == 0 || maximum[col] < value) maximum[col] = value;
-				if (r == 0 || minimum[col] > value) minimum[col] = value;
+					rowsData[r][col] = value;
+
+					if (r == 0 || maximum[col] < value) maximum[col] = value;
+					if (r == 0 || minimum[col] > value) minimum[col] = value;
+				}
 			}
 		} else {
 			for(int col = 0; col < columns; col++) names[col] = rowColumns[col];

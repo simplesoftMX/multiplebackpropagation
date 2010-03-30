@@ -19,6 +19,7 @@
 */
 
 #include "MBPkernels.h"
+#include "../MissingValues.h"
 
 #define OUTPUT_NEURON threadIdx.x
 #define OUTPUT_INCLUDING_BIAS (threadIdx.x + 1)
@@ -31,7 +32,7 @@
 
 #define PATTERN blockIdx.x
 
-KERNEL CalculateLocalGradient(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * localGradientNextLayer, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * localGradientSpaceNet) {
+KERNEL CalcLocalGradSelectiveInputs(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * selectiveNeuronsWeights, CUDA_FLOATING_TYPE * selectiveNeuronsBias, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * localGradientNextLayer, CUDA_FLOATING_TYPE * localGradient) {
     extern __shared__ CUDA_FLOATING_TYPE lg[];
     
 	if (bestRMS != NULL) {
@@ -47,10 +48,10 @@ KERNEL CalculateLocalGradient(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * be
             
     if (NEURON == 0) lgNextLayer[OUTPUT_NEURON] = localGradientNextLayer[PATTERN * NUM_OUTPUTS + OUTPUT_NEURON];
     
-    int connection = OUTPUT_NEURON * NUM_INPUTS_OUTPUT_NEURON + NEURON + 1;
+    int connection = OUTPUT_NEURON * NUM_INPUTS_OUTPUT_NEURON + NEURON + 1;    
     int threadId = (NEURON * NUM_OUTPUTS + OUTPUT_NEURON);
     
-    __syncthreads();
+    __syncthreads();    
     
     lg[threadId] = weights[connection] * lgNextLayer[OUTPUT_NEURON];
     __syncthreads();
@@ -68,25 +69,22 @@ KERNEL CalculateLocalGradient(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * be
     }
     
     if (OUTPUT_NEURON == 0) {
-        int n = PATTERN * NUM_NEURONS + NEURON;
-        
-        CUDA_FLOATING_TYPE Fh = outputs[n];
-    
-        CUDA_FLOATING_TYPE lgn = lg[threadId];
-    
-        if (m != NULL) {
-			int nSelAct = PATTERN * totalNeuronsWithSelectiveActivation + NEURON + mOffset;
+		CUDA_FLOATING_TYPE lgn = CUDA_VALUE(0.0);
 
-            CUDA_FLOATING_TYPE M = m[nSelAct];
-            if (M == CUDA_VALUE(0.0)) {
-                localGradientSpaceNet[nSelAct] = CUDA_VALUE(0.0);
-            } else {
-                Fh = Fh / M;
-                localGradientSpaceNet[nSelAct] = lgn * Fh * CUDA_SIGMOID_DERIVATE(M);
-            }
-            lgn *= M;
-        }
-    
-		localGradient[n] = lgn * CUDA_SIGMOID_DERIVATE(Fh);
+        int n = PATTERN * NUM_NEURONS + NEURON;
+
+		CUDA_FLOATING_TYPE i = inputs[n];
+		
+		if (i < CUDA_MISSING_VALUE) {
+			CUDA_FLOATING_TYPE w = selectiveNeuronsWeights[NEURON];
+			CUDA_FLOATING_TYPE b = selectiveNeuronsBias[NEURON];
+
+			if (w != CUDA_VALUE(0.0) || b != CUDA_VALUE(0.0)) { // input may have missing values
+				CUDA_FLOATING_TYPE coshfx = CUDA_COSH(i * w + b);
+				lgn = lg[threadId] / (coshfx * coshfx); // derivate = 1 / (coshfx * coshfx)
+			}
+		}
+
+		localGradient[n] = lgn;
     }
 }

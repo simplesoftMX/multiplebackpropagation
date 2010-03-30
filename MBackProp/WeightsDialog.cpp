@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -88,18 +88,52 @@ void WeightsDialog::DetermineRowsColumnsNeededToDisplay(long network, long & row
  Purpose     : Fill the grid with the main/space network weights. 
  Version     : 1.0.0
 */
-void WeightsDialog::DisplayNetworkWeights(long network, long & row) {
+void WeightsDialog::DisplayNetworkWeights(long network, long & row, int numberMissingValues) {
+	CString s;
+
 	MBPTopologyControl * MBPTopologyCtrl = parent->MBPTopologyCtrl;
 	MBPGrid::Grid ^ grid = Container::grid;
 
 	long columns = grid->Columns;
 
-	long numberLayers = MBPTopologyCtrl->GetLayers(network);	
+	long numberLayers = MBPTopologyCtrl->GetLayers(network);
+
+	if (numberMissingValues) {
+		grid[++row, 0] = gcnew System::String("/Tmissing values neurons");
+		grid[row, 1] = gcnew System::String("/Sbias");
+		grid[row, 2] = gcnew System::String("/Sinput");
+		grid[row, 3] = System::String::Empty;
+
+		int numberTrainVariables = parent->trainVariables.Number();
+		for(int v = 0; v < numberTrainVariables; v++) {			
+			if (parent->trainVariables.HasMissingValues(v)) {
+				double bias, weight;
+
+				s.Format(L"/S%dth neuron", v + 1);
+				grid[++row, 0] = gcnew System::String(s);			
+
+				if (network == MAIN_NETWORK) {					
+					parent->mbp->WeightsMissingValueNeuron(v, bias, weight);
+				} else {
+					parent->mbp->SpaceWeightsMissingValueNeuron(v, bias, weight);
+				}
+
+				s.Format(L"%g", bias);
+				grid[row, 1] = gcnew System::String(s);
+
+				s.Format(L"%g", weight);
+				grid[row, 2] = gcnew System::String(s);
+
+				grid[row, 3] = System::String::Empty;
+			}
+		}
+
+		row++;
+	}
 
 	for (long l = 1; l < numberLayers; l++) {
 		long lastLayerNeurons = MBPTopologyCtrl->GetNeurons(l - 1, network);
 	
-		CString s;	
 		if (l == 1) {
 			s = L"/Tfrom the input layer";
 		} else {
@@ -188,6 +222,17 @@ BOOL WeightsDialog::OnInitDialog() {
 	DetermineRowsColumnsNeededToDisplay(MAIN_NETWORK, mainNetRows, columns);
 	DetermineRowsColumnsNeededToDisplay(SPACE_NETWORK, spaceNetRows, columns);
 
+	int numberMissingValues = 0;
+	int numberTrainVariables = parent->trainVariables.Number();
+	for(int v = 0; v < numberTrainVariables; v++) {
+		if (parent->trainVariables.HasMissingValues(v)) numberMissingValues++;
+	}
+
+	if (numberMissingValues) {
+		mainNetRows += (3 + numberMissingValues);
+		if (spaceNetRows) spaceNetRows += (3 + numberMissingValues);
+	}
+
 	MBPGrid::Grid ^ grid = Container::grid;
 
 	grid->Rows = mainNetRows + ((spaceNetRows > 0) ? spaceNetRows + 5 : 0);
@@ -202,11 +247,11 @@ BOOL WeightsDialog::OnInitDialog() {
 		row = 0;
 	}
 
-	DisplayNetworkWeights(MAIN_NETWORK, row);
+	DisplayNetworkWeights(MAIN_NETWORK, row, numberMissingValues);
 
 	if (spaceNetRows > 0) {
 		grid[++row, 0] = gcnew System::String(L"/PSpace Network");
-		DisplayNetworkWeights(SPACE_NETWORK, ++row);
+		DisplayNetworkWeights(SPACE_NETWORK, ++row, numberMissingValues);
 	}
 
 	return TRUE;

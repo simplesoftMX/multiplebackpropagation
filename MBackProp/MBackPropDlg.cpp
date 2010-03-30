@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -434,7 +434,7 @@ void CMBackPropDlg::TrainOneEpochUsingCuda() {
 
 	++epoch;
 
-	mbpCuda->Train(mbp->GetMomentum(), mbp->GetSpaceMomentum(), robustLearning, rmsGrowToApplyRobustLearning, robustFactor);
+	mbpCuda->Train((CUDA_FLOATING_TYPE) mbp->GetMomentum(), (CUDA_FLOATING_TYPE) mbp->GetSpaceMomentum(), robustLearning, (CUDA_FLOATING_TYPE) rmsGrowToApplyRobustLearning, (CUDA_FLOATING_TYPE) robustFactor);
 
 	rms = mbpCuda->GetRMS();
 
@@ -878,7 +878,23 @@ bool CMBackPropDlg::TopologyIsValid() {
  Comments : The network will only be created if it does not exist.
 */
 bool CMBackPropDlg::CreateNetwork() {
-	if (!mbp.IsNull()) return true;
+	if (!mbp.IsNull()) {
+		bool variablesWithMissingValuesChanged = false;
+
+		int inputs = mbp->Inputs();
+		for(int i = 0; i < inputs; i++) {
+			if (mbp->InputCanHaveMissingValues(i) != trainVariables.HasMissingValues(i)) {
+				variablesWithMissingValuesChanged = true;
+				break;
+			}
+		}
+
+		if (variablesWithMissingValuesChanged) {
+			ResetNetwork();
+		} else {
+			return true;
+		}
+	}
 
 	if (!TopologyIsValid()) return false;
 
@@ -924,7 +940,15 @@ bool CMBackPropDlg::CreateNetwork() {
 			}
 		}
 
-		mbp = new MultipleBackPropagation(layersSize, activationFunction, activationFunctionParameter, MBPTopologyCtrl->GetConnectInputLayerWithOutputLayer(TRUE), layersSizeSpaceNet, activationFunctionSpaceNet, activationFunctionParameterSpaceNet, MBPTopologyCtrl->GetConnectInputLayerWithOutputLayer(FALSE), neuronsWithSelectiveActivation);
+		int inputs = layersSize[0];
+
+		Array<bool> inputMissingValues;
+		inputMissingValues.Resize(inputs);
+		for(int i = 0; i < inputs; i++) {
+			inputMissingValues[i] = (i < trainVariables.Number()) ? trainVariables.HasMissingValues(i) : false;
+		}
+
+		mbp = new MultipleBackPropagation(layersSize, activationFunction, activationFunctionParameter, MBPTopologyCtrl->GetConnectInputLayerWithOutputLayer(TRUE), layersSizeSpaceNet, activationFunctionSpaceNet, activationFunctionParameterSpaceNet, MBPTopologyCtrl->GetConnectInputLayerWithOutputLayer(FALSE), neuronsWithSelectiveActivation, inputMissingValues);
 		return true;
 	} catch (BasicException e) {
 		e.MakeSureUserIsInformed();
@@ -989,12 +1013,21 @@ bool CMBackPropDlg::LoadTrainingData(bool warnUser) {
 				double max = trainVariables.Maximum(i);
 
 				for (int p = 0; p < trainPatterns; p++) {
-					trainInputPatterns[p][i] = (min == max) ? 1.0 : (-1.0 + 2.0 * (trainVariables.Value(i, p) - min) / (max - min));
+					double value = trainVariables.Value(i, p);
+
+					if (_isnan(value)) {
+						trainInputPatterns[p][i] = MISSING_VALUE;
+					} else {
+						trainInputPatterns[p][i] = (min == max) ? 1.0 : (-1.0 + 2.0 * (value - min) / (max - min));
+					}
 				}
 			}
 
 			trainDesiredOutputPatterns.Resize(trainPatterns, outputs);
+
 			desiredTrainOutputs.Resize(outputs, trainPatterns);
+			trainingOutputGraphic->SetNumberPointsDraw(desiredTrainOutputs.Columns(), 1);
+
 			networkTrainOutputs.Resize(outputs, trainPatterns);
 
 			int outputLayer = MBPTopologyCtrl->GetLayers(true) - 1;
@@ -1046,8 +1079,13 @@ bool CMBackPropDlg::LoadTrainingData(bool warnUser) {
 				double max = trainVariables.Maximum(outVar);
 
 				for (int p = 0; p < trainPatterns; p++) {
-					trainDesiredOutputPatterns[p][o] = desiredTrainOutputs[o][p] = (min == max) ? 1.0 : (newMin + (trainVariables.Value(outVar, p) - min) * (1.0 - newMin) / (max - min));
-					//trainDesiredOutputPatterns[p][o] = desiredTrainOutputs[o][p] = (min == max) ? newMax : newMin + (trainVariables.Value(outVar, p) - min) * (newMax - newMin) / (max - min);
+					double value = trainVariables.Value(outVar, p);
+
+					if (_isnan(value)) {
+						trainDesiredOutputPatterns[p][o] = desiredTrainOutputs[o][p] = MISSING_VALUE;
+					} else {
+						trainDesiredOutputPatterns[p][o] = desiredTrainOutputs[o][p] = (min == max) ? 1.0 : (newMin + (value - min) * (1.0 - newMin) / (max - min));
+					}
 				}
 			}
 		}
@@ -1065,6 +1103,13 @@ bool CMBackPropDlg::LoadTestingData(bool warnUser) {
 
 	if (testFileName.IsEmpty()) {
 		testVariables.Clear();
+
+		testingOutputGraphic->Clear();
+		testingOutputGraphic->SetNumberPointsDraw(0, 1);
+
+		testDesiredOutputPatterns.Resize(0, 0);
+		desiredTestOutputs.Resize(0, 0);
+		networkTestOutputs.Resize(0, 0);
 	} else {		
 		CFileStatus fileStatus;
 		if (!CFile::GetStatus(testFileName, fileStatus)) {
@@ -1125,12 +1170,21 @@ bool CMBackPropDlg::LoadTestingData(bool warnUser) {
 				}
 
 				for (int p = 0; p < testPatterns; p++) { 
-					testInputPatterns[p][i] = (min == max) ? 1 : (- 1 + (2 * (testVariables.Value(i, p) - min)) / (max - min));
+					double value = testVariables.Value(i, p);
+
+					if (_isnan(value)) {
+						testInputPatterns[p][i] = MISSING_VALUE;
+					} else {
+						testInputPatterns[p][i] = (min == max) ? 1 : (- 1 + (2 * (value - min)) / (max - min));
+					}
 				}
 			}
 
 			testDesiredOutputPatterns.Resize(testPatterns, outputs);
+
 			desiredTestOutputs.Resize(outputs, testPatterns);
+			testingOutputGraphic->SetNumberPointsDraw(desiredTestOutputs.Columns(), 1);
+
 			networkTestOutputs.Resize(outputs, testPatterns);
 
 			int outputLayer = MBPTopologyCtrl->GetLayers(true) - 1;
@@ -1157,7 +1211,13 @@ bool CMBackPropDlg::LoadTestingData(bool warnUser) {
 				}
 
 				for (int p = 0; p< testPatterns; p++) {
-					testDesiredOutputPatterns[p][o] = desiredTestOutputs[o][p] = (min == max) ? 1.0 : (newMin + (testVariables.Value(outVar, p) - min) * (1.0 - newMin) / (max - min));
+					double value = testVariables.Value(outVar, p);
+
+					if (_isnan(value)) {
+						testDesiredOutputPatterns[p][o] = desiredTestOutputs[o][p] = MISSING_VALUE;
+					} else {
+						testDesiredOutputPatterns[p][o] = desiredTestOutputs[o][p] = (min == max) ? 1.0 : (newMin + (value - min) * (1.0 - newMin) / (max - min));
+					}
 				}
 			}
 		}
@@ -1166,30 +1226,94 @@ bool CMBackPropDlg::LoadTestingData(bool warnUser) {
 	return successfull;
 }
 
-/**
- Method   : void OnTrain()
- Puropse  : Train the network.
- Version  : 1.1.3
-*/
-void CMBackPropDlg::OnTrain() {
-	if (!CreateNetwork()) return;
+bool CMBackPropDlg::NetworkIsValid(bool checkCudaAndMissingValues) {
+	int inputs = MBPTopologyCtrl->GetInputs();
+	int outputs = MBPTopologyCtrl->GetOutputs();
 
-	if (!LoadTrainingData()) return;
-	if (trainVariables.Number() !=  mbp->Inputs() + mbp->Outputs()) {
-		WarnUser(_TEXT("The number of network inputs plus the number of outputs does not match the number of variables in the training file."));
+	if (!LoadTrainingData()) return false;
+	if (trainVariables.Number() !=  inputs + outputs) {
+		WarnUser(L"The number of network inputs plus the number of outputs does not match the number of variables in the training file.");
 		MBPTopologyCtrl->SetFocus();
 		tabs.SetCurFocus(tabTopology);
-		return;
-	}	
+		return false;
+	}
 
-	if (!LoadTestingData()) return;
+	if (!LoadTestingData()) return false;
 	if (testVariables.Number() != 0) {
 		if (trainVariables.Number() != testVariables.Number()) {
 			WarnUser(_TEXT("The number of network inputs plus the number of outputs does not match the number of variables in the testing file."));
 			m_testFileBox.SetFocus();
-			return;
+			return false;
 		}
 	}
+
+	for (int o = 0; o < outputs; o++) {
+		int outVar = o + inputs;
+
+		bool hasMissingValues = false;
+		CString dataset;
+
+		if (trainVariables.HasMissingValues(outVar)) {
+			hasMissingValues = true;
+			if (!testVariables.HasMissingValues(outVar)) dataset = L" (training dataset)";
+		} else if (outVar < testVariables.Number() && testVariables.HasMissingValues(outVar)) {
+			hasMissingValues = true;
+			dataset = L" (test dataset)";
+		}
+
+		if (hasMissingValues) {
+			CString columnName = trainVariables.Name(outVar);
+			if (columnName.IsEmpty()) {
+				columnName.Format(L"%d", outVar + 1);
+			} else {
+				columnName = L"«" + columnName + L"»";
+			}
+
+			WarnUser(L"Column " + columnName + L" has missing values" + dataset + L". Output columns cannot have missing values.");
+			MBPTopologyCtrl->SetFocus();
+			tabs.SetCurFocus(tabTopology);
+			return false;
+		}
+	}
+
+	int columnsWithMissingValues = 0;
+	for (int i = 0; i < inputs; i++) {
+		if (trainVariables.HasMissingValues(i)) {
+			columnsWithMissingValues++;
+		} else if (i < testVariables.Number() && testVariables.HasMissingValues(i)) {
+			CString columnName = trainVariables.Name(i);
+			if (columnName.IsEmpty()) {
+				columnName.Format(L"%d", i + 1);
+			} else {
+				columnName = L"«" + columnName + L"»";
+			}
+
+			WarnUser(L"Column " + columnName + L" has missing values in test dataset but not in the training dataset. A variable can only have missing values in the test dataset if it has also missing values on the training dataset.");
+			MBPTopologyCtrl->SetFocus();
+			tabs.SetCurFocus(tabTopology);
+			return false;
+		}
+	}
+
+	/*if (columnsWithMissingValues && checkCudaAndMissingValues && useCuda) {
+		WarnUser(L"Currently missing values are only supported by CUDA. Please disable CUDA if you want to train a network with missing values.");
+		return false;
+	}*/
+
+	return true;
+}
+
+/**
+ Method   : void OnTrain()
+ Puropse  : Train the network.
+ Called when the user clicks the train button
+*/
+void CMBackPropDlg::OnTrain() {
+	if (!NetworkIsValid(true)) return;
+
+	LoadTrainingTestDataIfPossible();
+
+	if (!CreateNetwork()) return;
 
 	trainButton.EnableWindow(FALSE);
 	EnableOperations(FALSE);
@@ -1852,33 +1976,35 @@ void CMBackPropDlg::OnChangeTrainFileBox() {
 /**
  Method   : void CMBackPropDlg::OnRandomizeWeights()
  Purpose  : Randomize the network weights between two 
-            values determined by the user.
- Version  : 1.2.0
+            values determined by the user. 
  Comments : This is done only if the topology is valid.
+            Called when the user clicks the randomize weights button.
 */
 void CMBackPropDlg::OnRandomizeWeights() {
-	if (!TopologyIsValid()) return;
+	LoadTrainingTestDataIfPossible();
+	if (mbp.IsNull()) return;
 
 	RandWeightsDialog dialog(this);
 
 	if (dialog.DoModal() == IDOK) {
-		ResetNetwork();
-		epochDisplay.SetWindowText(_TEXT("0"));
+		epochDisplay.SetWindowText(L"0");
 		RMSGraphic->Clear();
-		if (CreateNetwork()) LoadTrainingTestDataIfPossible();
+		ResetNetwork();
+		LoadTrainingTestDataIfPossible();
 	}
 }
 
 /**
  Method   : void CMBackPropDlg::OnLoadWeights()
  Purpose  : Load network weights.
- Version  : 1.0.0
+ Called when the user clicks the load weights button
 */
 void CMBackPropDlg::OnLoadWeights() {
-	if (!CreateNetwork()) return;
+	LoadTrainingTestDataIfPossible();
+	if (mbp.IsNull()) return;
 
 	LoadWeightsDialog dialog(this);
-	if (dialog.DoModal() == IDOK) {		
+	if (dialog.DoModal() == IDOK) {
 		epoch = 0;
 		trainingTime = 0;
 		UpdateLearningMomentum();
@@ -1889,10 +2015,11 @@ void CMBackPropDlg::OnLoadWeights() {
 /**
  Method   : void CMBackPropDlg::OnSaveWeights()
  Purpose  : Load network weights.
- Version  : 1.0.0
+ Called when the user clicks the save weights button
 */
 void CMBackPropDlg::OnSaveWeights() {
-	if (!CreateNetwork()) return;
+	LoadTrainingTestDataIfPossible();
+	if (mbp.IsNull()) return;
 
 	SaveWeightsDialog dialog(this);
 	dialog.DoModal();
@@ -1901,12 +2028,12 @@ void CMBackPropDlg::OnSaveWeights() {
 /**
  Method   : void CMBackPropDlg::OnGenerateCCode()
  Purpose  : Generate C code for the network.
- Version  : 1.0.0
+ Called when the user clicks the generate C code button
 */
 void CMBackPropDlg::OnGenerateCCode() {
-	if (!CreateNetwork()) return;
-
 	LoadTrainingTestDataIfPossible();
+	if (mbp.IsNull()) return;
+
 	GenerateCCodeDialog dialog(this);
 	dialog.DoModal();
 }
@@ -1914,36 +2041,38 @@ void CMBackPropDlg::OnGenerateCCode() {
 /**
  Method   : void CMBackPropDlg::OnLoadNetwork()
  Purpose  : Load a network.
- Version  : 1.0.0
+ Called when the user clicks the load network button
 */
 void CMBackPropDlg::OnLoadNetwork() {
 	LoadNetworkDialog dialog(this);
-	if (dialog.DoModal() == IDOK) {
-		LoadTrainingTestDataIfPossible();
-	}
+	if (dialog.DoModal() == IDOK) LoadTrainingTestDataIfPossible();
 }
 
 /**
  Method   : void CMBackPropDlg::OnSaveNetwork()
  Purpose  : Save a network.
- Version  : 1.0.0
+ Called when the user clicks the save network button
 */
 void CMBackPropDlg::OnSaveNetwork() {
-	if (!CreateNetwork()) return;
+ 	LoadTrainingTestDataIfPossible();
+	if (mbp.IsNull()) return;
+
 	SaveNetworkDialog dialog(this);
 	dialog.DoModal();
 }
 
 /**
- Method   : void CMBackPropDlg::LoadTrainingTestDataIfPossible()
- Purpose  : Load training and test data if possible. Calculate the 
-            corresponding RMS errors and update graphics.
- Version  : 1.0.0
+Load training and test data if possible. 
+Calculate the corresponding RMS errors and update graphics. 
+If the network was not created yet it will be created.
 */
 void CMBackPropDlg::LoadTrainingTestDataIfPossible(bool changeTab) {
 	double rms, spaceRMS;
 	bool comboFilled = false;		
 	int tab;
+
+	bool trainingDataLoaded = LoadTrainingData(false);
+	bool testDataLoaded = LoadTestingData(false);
 
 	int selOutput = comboOutput->GetCurSel();
 	
@@ -1963,7 +2092,7 @@ void CMBackPropDlg::LoadTrainingTestDataIfPossible(bool changeTab) {
 		mbpCuda = NULL;
 	#endif
 
-	if (LoadTrainingData(false)) {
+	if (trainingDataLoaded) {
 		if (trainVariables.Number() == numberVariables) {
 			TrainRMS(rms, spaceRMS, true);
 			tab = tabTrainOutDes;
@@ -1975,7 +2104,7 @@ void CMBackPropDlg::LoadTrainingTestDataIfPossible(bool changeTab) {
 		}
 	}
 
-	if (LoadTestingData(false)) {
+	if (testDataLoaded) {
 		if (testVariables.Number() == numberVariables) {
 			TestRMS(rms, spaceRMS, true);
 			tab = tabTestOutDes;
@@ -2548,6 +2677,7 @@ bool CMBackPropDlg::LoadNetwork(CString & filename) {
 			MBPTopologyCtrl->SetConnectInputLayerWithOutputLayer(FALSE, FALSE);
 		}
 
+		LoadTrainingData(false);
 		if (!CreateNetwork()) return false;
 
 		mbp->LoadWeights(f, (version >= _TEXT("1.5.0")));
@@ -2757,31 +2887,19 @@ void CMBackPropDlg::OnLearningMomentum() {
 	dialog.DoModal();	
 }
 
+// Called when the user clicks the view weights button
 void CMBackPropDlg::OnViewWeights() {
-	if (!CreateNetwork()) return;
 	LoadTrainingTestDataIfPossible();
+	if (mbp.IsNull()) return;
 
 	WeightsDialog dialog(this);
 	dialog.DoModal();
 }
 
+// Called when the user clicks the sensivity button
 void CMBackPropDlg::OnSensivity() {
+	if (!NetworkIsValid()) return;
 	if (!CreateNetwork()) return;
-	LoadTrainingTestDataIfPossible();
-
-	int numberVars = mbp->Inputs() + mbp->Outputs();
-
-	if (trainVariables.Number() != numberVars && testVariables.Number() != numberVars) {
-		if (!trainVariables.Number() && !testVariables.Number()) {
-			WarnUser(_TEXT("In order to calculate the input sensitivity of the network, you must specify a training or/and a test file."));
-			m_trainFileBox.SetFocus();
-		} else {
-			WarnUser(_TEXT("The number of network inputs plus the number of outputs does not match the number of variables in both the training and test files."));
-			MBPTopologyCtrl->SetFocus();
-			tabs.SetCurFocus(tabTopology);
-		}		
-		return;
-	}
 
 	SensitivityDialog dialog(this);
 	dialog.DoModal();

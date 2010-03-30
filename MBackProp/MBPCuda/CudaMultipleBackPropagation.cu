@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -25,8 +25,11 @@
 
 #ifdef TRY_SOLVE_PROBLEM
 
+#include <windows.h>
 #include <afxadv.h>
 #include <afxole.h>
+
+#define WarnUser(X) MessageBox(NULL, X, L"", MB_OK);
 
 void ShowArrayInfo(HostArray<CUDA_FLOATING_TYPE> & ha, int startingElements, int finalElements) {
 	CString s;
@@ -61,6 +64,18 @@ void ShowInfo(int v) {
 
 #endif*/
 
+void CudaMultipleBackPropagation::SelectiveInputLayer::Fire(cudaStream_t stream) {
+	FireSelectiveInputs<<<patterns, neurons, 0, stream>>>(inputs, weights.Pointer(), bias.Pointer(), outputs.Pointer());
+}
+
+void CudaMultipleBackPropagation::SelectiveInputLayer::CalculateLocalGradient(cudaStream_t stream, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, DeviceLayer * nextLayer) {
+	CalcLocalGradSelectiveInputs<<<patterns, dimOutputsNeurons, sharedMemGradients, stream>>>(rms, bestRMS, rmsGrowToApplyRobustLearning, inputs, weights.Pointer(), bias.Pointer(), nextLayer->weights.Pointer(), nextLayer->localGradient.Pointer(), localGradient.Pointer());
+}
+
+void CudaMultipleBackPropagation::SelectiveInputLayer::CorrectWeights(cudaStream_t stream, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, CUDA_FLOATING_TYPE robustFactor, CUDA_FLOATING_TYPE momentum) {
+	KernelCorrectWeightsSelectiveInputs(stream, neurons, patterns, rms, bestRMS, rmsGrowToApplyRobustLearning, inputs, localGradient.Pointer(), weights.Pointer(), bias.Pointer(), learnRate.Pointer(), learnRateBias.Pointer(), lastDeltaWithoutLearningMomentum.Pointer(), lastDeltaWithoutLearningMomentumBias.Pointer(), lastDelta.Pointer(), lastDeltaBias.Pointer(), (CUDA_FLOATING_TYPE) Connection::u, (CUDA_FLOATING_TYPE) Connection::d, robustFactor, momentum, patterns);
+}
+
 int CudaMultipleBackPropagation::DeviceLayer::neuronsWithSelectiveActivation = 0;
 
 void CudaMultipleBackPropagation::DeviceLayer::Fire(cudaStream_t stream) {
@@ -80,18 +95,20 @@ void CudaMultipleBackPropagation::DeviceLayer::Fire(cudaStream_t stream) {
 }
 
 void CudaMultipleBackPropagation::DeviceLayer::CalculateLocalGradient(cudaStream_t stream, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, DeviceLayer * nextLayer) {
-	::CalculateLocalGradient<<<patterns, dimOutputsNeurons, sharedMemGradients, stream>>>(rms, bestRMS, rmsGrowToApplyRobustLearning, outputs.Pointer(), nextLayer->weights.Pointer(), m, mOffset, neuronsWithSelectiveActivation, nextLayer->localGradient.Pointer(), localGradient.Pointer(), lgSpaceNet);
+	::CalculateLocalGradient<<<patterns, dimOutputsNeurons, sharedMemGradients, stream>>>(rms, bestRMS, rmsGrowToApplyRobustLearning, outputs.Pointer(), nextLayer->weights.Pointer(), m, mOffset, neuronsWithSelectiveActivation, nextLayer->localGradient.Pointer(), localGradient.Pointer(), lgSpaceNet);	
 }
 
 void CudaMultipleBackPropagation::DeviceLayer::CorrectWeights(cudaStream_t stream, int patternsBlockSize, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, CUDA_FLOATING_TYPE robustFactor, CUDA_FLOATING_TYPE momentum) {
-	KernelCorrectLayerWeights(stream, dimInputsNeurons, patternsBlockSize, rms, bestRMS, rmsGrowToApplyRobustLearning, inputValues, localGradient.Pointer(), weights.Pointer(), learnRate.Pointer(), lastDeltaWithoutLearningMomentum.Pointer(), lastDelta.Pointer(), (CUDA_FLOATING_TYPE) Connection::u, (CUDA_FLOATING_TYPE) Connection::d, robustFactor, momentum, patterns);	
+	KernelCorrectLayerWeights(stream, dimInputsNeurons, patternsBlockSize, rms, bestRMS, rmsGrowToApplyRobustLearning, inputValues, localGradient.Pointer(), weights.Pointer(), learnRate.Pointer(), lastDeltaWithoutLearningMomentum.Pointer(), lastDelta.Pointer(), (CUDA_FLOATING_TYPE) Connection::u, (CUDA_FLOATING_TYPE) Connection::d, robustFactor, momentum, patterns);
 }
 
-void CudaMultipleBackPropagation::CreateDeviceLayers(List<Layer> & hostLayers, List<DeviceLayer> & deviceLayers, int patterns, int * neuronsWithSelectiveActivation) {
+void CudaMultipleBackPropagation::CreateDeviceLayers(List<Layer> & hostLayers, List<DeviceLayer> & deviceLayers, int patterns, int * neuronsWithSelectiveActivation, Pointer<CudaMultipleBackPropagation::SelectiveInputLayer> & sil) {
 	Layer * l = hostLayers.First();
 	int inputsWithoutBias = l->neurons.Lenght();
 
 	DeviceArray<CUDA_FLOATING_TYPE> * layerInputs = d_inputs;
+
+	if(!sil.IsNull()) layerInputs = &(sil->outputs);
 
 	DeviceLayer * outputLayerSpaceNetwork = layersSpaceNetwork.Last();
 
@@ -141,6 +158,51 @@ void CudaMultipleBackPropagation::CreateDeviceLayers(List<Layer> & hostLayers, L
 	}
 }
 
+CudaMultipleBackPropagation::SelectiveInputLayer * CudaMultipleBackPropagation::CreateSelectiveInputLayer(InputLayer * l, Pointer <MultipleBackPropagation> & mbp, int patterns) {
+	int ninputs = mbp->Inputs();
+
+	HostArray<CUDA_FLOATING_TYPE> weights(ninputs);
+	HostArray<CUDA_FLOATING_TYPE> bias(ninputs);
+	HostArray<CUDA_FLOATING_TYPE> learningRate(ninputs);
+	HostArray<CUDA_FLOATING_TYPE> learningRateBias(ninputs);
+	HostArray<CUDA_FLOATING_TYPE> lastDeltaWithoutLearningMomentumWeights(ninputs);
+	HostArray<CUDA_FLOATING_TYPE> lastDeltaWithoutLearningMomentumBias(ninputs);
+	HostArray<CUDA_FLOATING_TYPE> lDelta(ninputs);
+	HostArray<CUDA_FLOATING_TYPE> lDeltaBias(ninputs);
+
+	for(int i = 0; i < ninputs; i++) {
+		InputNeuron * n = static_cast<InputNeuron *>(l->neurons.Element(i));
+
+		InputNeuron::NeuronMissingValues * nmv = n->GetNeuronMissingValues();
+
+		if (nmv == NULL) {
+			bias[i] = CUDA_VALUE(0.0);
+			learningRateBias[i] = CUDA_VALUE(0.0);
+			lastDeltaWithoutLearningMomentumBias[i] = CUDA_VALUE(0.0);
+
+			weights[i] = CUDA_VALUE(0.0);				
+			learningRate[i] = CUDA_VALUE(0.0);
+			lastDeltaWithoutLearningMomentumWeights[i] = CUDA_VALUE(0.0);				
+		} else {
+			List<Connection> & connections = nmv->inputs;
+			
+			Connection * c = connections.Element(0);
+			bias[i] = (CUDA_FLOATING_TYPE) c->weight;
+			learningRateBias[i] = (CUDA_FLOATING_TYPE) c->learningRate;
+			lastDeltaWithoutLearningMomentumBias[i] = (CUDA_FLOATING_TYPE) c->lastDeltaWithoutLearningMomentum;
+			lDeltaBias[i] = (CUDA_FLOATING_TYPE) c->delta;
+
+			c = connections.Element(1);
+			weights[i] = (CUDA_FLOATING_TYPE) c->weight;
+			learningRate[i] = (CUDA_FLOATING_TYPE) c->learningRate;
+			lastDeltaWithoutLearningMomentumWeights[i] = (CUDA_FLOATING_TYPE) c->lastDeltaWithoutLearningMomentum;
+			lDelta[i] = (CUDA_FLOATING_TYPE) c->delta;
+		}
+	}
+
+	return new SelectiveInputLayer(patterns, ninputs, mbp->layers.Next()->neurons.Lenght(), d_inputs->Pointer(), weights, bias, learningRate, learningRateBias, lastDeltaWithoutLearningMomentumWeights, lastDeltaWithoutLearningMomentumBias, lDelta, lDeltaBias);
+}
+
 CudaMultipleBackPropagation::CudaMultipleBackPropagation(Pointer <MultipleBackPropagation> & mbp, Matrix<double> & trainInputPatterns, Matrix<double> & trainDesiredOutputPatterns) : d_rmsOut(1) {
     /*******
     Create the device vectors : d_inputs, d_desOutputs
@@ -163,17 +225,24 @@ CudaMultipleBackPropagation::CudaMultipleBackPropagation(Pointer <MultipleBackPr
     /*******
     Create the device layers
     *******/
+	InputLayer * l = static_cast<InputLayer *>(mbp->layers.First());
+
+	if (l->CanHaveMissingValues()) selectiveInputLayer = CreateSelectiveInputLayer(l, mbp, patterns);
+
 	maxNumberWeigths = 0;
 
 	int * neuronsWithSelectiveActivation = NULL;
 
 	if (!mbp->spaceNetwork.IsNull()) {
-		CreateDeviceLayers(mbp->spaceNetwork->layers, layersSpaceNetwork, patterns, NULL);
+		l = static_cast<InputLayer *>(mbp->spaceNetwork->layers.First());
+		if (l->CanHaveMissingValues()) selectiveInputLayerSpaceNetwork = CreateSelectiveInputLayer(l, mbp, patterns);
+
+		CreateDeviceLayers(mbp->spaceNetwork->layers, layersSpaceNetwork, patterns, NULL, selectiveInputLayerSpaceNetwork);
 		neuronsWithSelectiveActivation = mbp->neuronsWithSelectiveActivation.Pointer();
 		DeviceLayer::neuronsWithSelectiveActivation = layersSpaceNetwork.Last()->neurons;
 	}
 
-	CreateDeviceLayers(mbp->layers, layers, patterns, neuronsWithSelectiveActivation);
+	CreateDeviceLayers(mbp->layers, layers, patterns, neuronsWithSelectiveActivation, selectiveInputLayer);
 
 	DeviceLayer * dlOut = layers.Last();
 
@@ -181,6 +250,8 @@ CudaMultipleBackPropagation::CudaMultipleBackPropagation(Pointer <MultipleBackPr
     Robust Learning
     *******/
 	layersRobustTraining = layersSpaceNetwork.Lenght() + layers.Lenght();
+	if (!selectiveInputLayer.IsNull()) layersRobustTraining += 2;
+	if (!selectiveInputLayerSpaceNetwork.IsNull()) layersRobustTraining += 2;
 
 	HostArray<int> numberWeightsLayer(layersRobustTraining);	
 	HostArray<CUDA_FLOATING_TYPE *> weightsLayers(layersRobustTraining);
@@ -190,6 +261,27 @@ CudaMultipleBackPropagation::CudaMultipleBackPropagation(Pointer <MultipleBackPr
 	HostArray<CUDA_FLOATING_TYPE *> lastDeltaWithoutLMlayers(layersRobustTraining);
 
 	int ll = 0;
+
+	if (!selectiveInputLayerSpaceNetwork.IsNull()) {
+		numberWeightsLayer[ll] = ninputs;
+		weightsLayers[ll] = selectiveInputLayerSpaceNetwork->weights.Pointer();
+		bestWeightsLayers[ll] = selectiveInputLayerSpaceNetwork->bestWeights.Pointer();
+		learnRatesLayers[ll] = selectiveInputLayerSpaceNetwork->learnRate.Pointer();
+		lastDeltaLayers[ll] = selectiveInputLayerSpaceNetwork->lastDelta.Pointer();
+		lastDeltaWithoutLMlayers[ll] = selectiveInputLayerSpaceNetwork->lastDeltaWithoutLearningMomentum.Pointer();
+
+		ll++;
+
+		numberWeightsLayer[ll] = ninputs;
+		weightsLayers[ll] = selectiveInputLayerSpaceNetwork->bias.Pointer();
+		bestWeightsLayers[ll] = selectiveInputLayerSpaceNetwork->bestBias.Pointer();
+		learnRatesLayers[ll] = selectiveInputLayerSpaceNetwork->learnRateBias.Pointer();
+		lastDeltaLayers[ll] = selectiveInputLayerSpaceNetwork->lastDeltaBias.Pointer();
+		lastDeltaWithoutLMlayers[ll] = selectiveInputLayerSpaceNetwork->lastDeltaWithoutLearningMomentumBias.Pointer();
+
+		ll++;
+	}
+
 	for(DeviceLayer * l = layersSpaceNetwork.First(); l != NULL; l = layersSpaceNetwork.Next()) {		
 		numberWeightsLayer[ll] = l->connections;
 		weightsLayers[ll] = l->weights.Pointer();
@@ -200,6 +292,27 @@ CudaMultipleBackPropagation::CudaMultipleBackPropagation(Pointer <MultipleBackPr
 
 		ll++;
 	}
+
+	if (!selectiveInputLayer.IsNull()) {
+		numberWeightsLayer[ll] = ninputs;
+		weightsLayers[ll] = selectiveInputLayer->weights.Pointer();
+		bestWeightsLayers[ll] = selectiveInputLayer->bestWeights.Pointer();
+		learnRatesLayers[ll] = selectiveInputLayer->learnRate.Pointer();
+		lastDeltaLayers[ll] = selectiveInputLayer->lastDelta.Pointer();
+		lastDeltaWithoutLMlayers[ll] = selectiveInputLayer->lastDeltaWithoutLearningMomentum.Pointer();
+
+		ll++;
+
+		numberWeightsLayer[ll] = ninputs;
+		weightsLayers[ll] = selectiveInputLayer->bias.Pointer();
+		bestWeightsLayers[ll] = selectiveInputLayer->bestBias.Pointer();
+		learnRatesLayers[ll] = selectiveInputLayer->learnRateBias.Pointer();
+		lastDeltaLayers[ll] = selectiveInputLayer->lastDeltaBias.Pointer();
+		lastDeltaWithoutLMlayers[ll] = selectiveInputLayer->lastDeltaWithoutLearningMomentumBias.Pointer();
+
+		ll++;
+	}
+
 	for(DeviceLayer * l = layers.First(); l != NULL; l = layers.Next()) {
 		numberWeightsLayer[ll] = l->connections;
 		weightsLayers[ll] = l->weights.Pointer();
@@ -253,11 +366,14 @@ CudaMultipleBackPropagation::~CudaMultipleBackPropagation() {
 	cudaFreeHost(rms);
 }
 
-void CudaMultipleBackPropagation::Train(double momentum, double spaceMomentum, bool robustLearning, double rmsGrowToApplyRobustLearning, double robustFactor) {
+void CudaMultipleBackPropagation::Train(CUDA_FLOATING_TYPE momentum, CUDA_FLOATING_TYPE spaceMomentum, bool robustLearning, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, CUDA_FLOATING_TYPE robustFactor) {
 	/*******
     Determine the network outputs
     *******/
+	if (!selectiveInputLayerSpaceNetwork.IsNull()) selectiveInputLayerSpaceNetwork->Fire(streamKernels);
 	for(DeviceLayer * l = layersSpaceNetwork.First(); l != NULL; l = layersSpaceNetwork.Next()) l->Fire(streamKernels);
+
+	if (!selectiveInputLayer.IsNull()) selectiveInputLayer->Fire(streamKernels);
 	for(DeviceLayer * l = layers.First(); l != NULL; l = layers.Next()) l->Fire(streamKernels);
 
     /*******
@@ -287,17 +403,24 @@ void CudaMultipleBackPropagation::Train(double momentum, double spaceMomentum, b
 		nextLayer = l;
 	}
 
+	if (!selectiveInputLayer.IsNull()) selectiveInputLayer->CalculateLocalGradient(streamKernels, rms, bestRMS, (CUDA_FLOATING_TYPE) rmsGrowToApplyRobustLearning, nextLayer);
+
 	nextLayer = layersSpaceNetwork.Last();
 	for(DeviceLayer * l = layersSpaceNetwork.Previous(); l != NULL; l = layersSpaceNetwork.Previous()) {
 		l->CalculateLocalGradient(streamKernels, rms, bestRMS, (CUDA_FLOATING_TYPE) rmsGrowToApplyRobustLearning, nextLayer);
 		nextLayer = l;
 	}
 
+	if (!selectiveInputLayerSpaceNetwork.IsNull()) selectiveInputLayerSpaceNetwork->CalculateLocalGradient(streamKernels, rms, bestRMS, (CUDA_FLOATING_TYPE) rmsGrowToApplyRobustLearning, nextLayer);
+
 	/*******
 	Train the network
 	*******/
 	for(DeviceLayer * l = layers.Last(); l != NULL; l = layers.Previous()) l->CorrectWeights(streamKernels, patternsBlockSize, rms, bestRMS, rmsGrowToApplyRobustLearning, robustFactor, momentum);
+	if (!selectiveInputLayer.IsNull()) selectiveInputLayer->CorrectWeights(streamKernels, rms, bestRMS, rmsGrowToApplyRobustLearning, robustFactor, momentum);
+
 	for(DeviceLayer * l = layersSpaceNetwork.Last(); l != NULL; l = layersSpaceNetwork.Previous()) l->CorrectWeights(streamKernels, patternsBlockSize, rms, bestRMS, rmsGrowToApplyRobustLearning, robustFactor, spaceMomentum);
+	if (!selectiveInputLayerSpaceNetwork.IsNull()) selectiveInputLayerSpaceNetwork->CorrectWeights(streamKernels, rms, bestRMS, rmsGrowToApplyRobustLearning, robustFactor, momentum);
 }
 
 void CudaMultipleBackPropagation::CopyLayersToHost(List<DeviceLayer> & deviceLayers, List<Layer> & hostLayers) {
@@ -325,7 +448,49 @@ void CudaMultipleBackPropagation::CopyLayersToHost(List<DeviceLayer> & deviceLay
 	}
 }
 
+void CudaMultipleBackPropagation::CopySelectiveInputLayerToHost(CudaMultipleBackPropagation::SelectiveInputLayer * l, InputLayer * hl) {
+	HostArray<CUDA_FLOATING_TYPE> dweights(l->weights);
+	HostArray<CUDA_FLOATING_TYPE> dbias(l->bias);
+
+	HostArray<CUDA_FLOATING_TYPE> dlearnRate(l->learnRate);
+	HostArray<CUDA_FLOATING_TYPE> dlearnRateBias(l->learnRateBias);
+
+	HostArray<CUDA_FLOATING_TYPE> dlastDelta(l->lastDelta);
+	HostArray<CUDA_FLOATING_TYPE> dlastDeltaBias(l->lastDeltaBias);
+
+	HostArray<CUDA_FLOATING_TYPE> dlastDeltaWithoutLearningMomentum(l->lastDeltaWithoutLearningMomentum);
+	HostArray<CUDA_FLOATING_TYPE> dlastDeltaWithoutLearningMomentumBias(l->lastDeltaWithoutLearningMomentumBias);
+
+	int i = 0;
+	for(InputNeuron * n = static_cast<InputNeuron *> (hl->neurons.First()); n != NULL; n = static_cast<InputNeuron *> (hl->neurons.Next())) {
+		InputNeuron::NeuronMissingValues * nmv = n->GetNeuronMissingValues();
+
+		if (nmv != NULL) {
+			List<Connection> & connections = nmv->inputs;
+			
+			Connection * c = connections.Element(0);
+			c->weight = dbias[i];
+			c->learningRate = dlearnRateBias[i]; 
+			c->lastDeltaWithoutLearningMomentum = dlastDeltaWithoutLearningMomentumBias[i];
+			c->delta = dlastDeltaBias[i];
+
+			c = connections.Element(1);
+			c->weight = dweights[i];
+			c->learningRate = dlearnRate[i]; 
+			c->lastDeltaWithoutLearningMomentum = dlastDeltaWithoutLearningMomentum[i];
+			c->delta = dlastDelta[i];
+		}
+
+		i++;		
+	}
+}
+
 void CudaMultipleBackPropagation::CopyNetworkHost(Pointer <MultipleBackPropagation> & mbp) {
-	if (!mbp->spaceNetwork.IsNull()) CopyLayersToHost(layersSpaceNetwork, mbp->spaceNetwork->layers);
+	if (!mbp->spaceNetwork.IsNull()) {
+		if (!selectiveInputLayerSpaceNetwork.IsNull()) CopySelectiveInputLayerToHost(selectiveInputLayerSpaceNetwork, static_cast<InputLayer *>(mbp->spaceNetwork->layers.First()));
+		CopyLayersToHost(layersSpaceNetwork, mbp->spaceNetwork->layers);
+	}
+
+	if (!selectiveInputLayer.IsNull()) CopySelectiveInputLayerToHost(selectiveInputLayer, static_cast<InputLayer *>(mbp->layers.First()));
 	CopyLayersToHost(layers, mbp->layers);
 }

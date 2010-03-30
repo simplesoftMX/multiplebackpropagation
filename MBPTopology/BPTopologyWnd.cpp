@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -337,16 +337,23 @@ int BPTopologyWnd::DrawNetwork(FlickerFreeDC & dc, const CRect & drawingArea, in
 		license += "You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.\n";
 
 		if (mainNetwork == NULL) {
-			CString s = L"Please properly cite our work if you find it useful. This supports future development. The following articles provided the foundation for Multiple Back-Propagation software (A bib file <mbp.bib> is included with this software):\n";
+			CString s = L"Please properly cite our work if you find it useful. This supports future development. The following articles provided the foundation for Multiple Back-Propagation software (A bib file <mbp.bib> is included with this software):";
 
-			r.top += dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
+			r.top += 10 + dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
 			r.left += 7;
 
-			s = L"Lopes, N. and Ribeiro, B. (2009). GPU Implementation of the Multiple Back-Propagation Algorithm, In Proceedings of Intelligent Data Engineering and Automated Learning. Lecture Notes in Computer Science, Springer Berlin / Heidelberg, volume 5788, pages 449-456.\n\n";
-			s += L"Lopes, N. and Ribeiro, B. (2003). An Efficient Gradient-Based Learning Algorithm Applied to Neural Networks with Selective Actuation Neurons. In Neural, Parallel & Scientific Computations, volume 11, pages 253-272. Dynamic Publishers.\n\n";
-			s += L"Lopes, N. and Ribeiro, B. (2001). Hybrid learning in a multi neural network architecture. In INNS-IEEE International Joint Conference on Neural Networks, IJCNN'01, volume 4, pages 2788-2793, Washington D.C., USA.\n";
+			s = L"Lopes, N. and Ribeiro, B. (2010). A Strategy for Dealing With Missing Values by Using Selective Activation Neurons in a Multi-Topology Framework. IEEE World congress on Computational Intelligence WCCI 2010.";
+			r.top += 10 + dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
 
+			s = L"Lopes, N. and Ribeiro, B. (2009). GPU Implementation of the Multiple Back-Propagation Algorithm, In Proceedings of Intelligent Data Engineering and Automated Learning. Lecture Notes in Computer Science, Springer Berlin / Heidelberg, volume 5788, pages 449-456.";
+			r.top += 10 + dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
+
+			s = L"Lopes, N. and Ribeiro, B. (2003). An Efficient Gradient-Based Learning Algorithm Applied to Neural Networks with Selective Actuation Neurons. In Neural, Parallel & Scientific Computations, volume 11, pages 253-272. Dynamic Publishers.";
+			r.top += 10 + dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
+
+			s = L"Lopes, N. and Ribeiro, B. (2001). Hybrid learning in a multi neural network architecture. In INNS-IEEE International Joint Conference on Neural Networks, IJCNN'01, volume 4, pages 2788-2793, Washington D.C., USA.\n";
 			r.top += dc.DrawText(s, s.GetLength(), &r, DT_WORDBREAK | DT_NOPREFIX);
+
 			r.left -= 7;
 
 			dc.Line(r.left, r.top, r.right, r.top);

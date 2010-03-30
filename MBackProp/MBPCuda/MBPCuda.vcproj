@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="MBPCuda"
 	ProjectGUID="{CAA36609-7718-44F0-A33E-F4E5ACDB13F6}"
 	RootNamespace="MBPCuda"
@@ -584,11 +584,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\CalcLocalGradSelectiveInputs.cu"
+				>
+			</File>
+			<File
 				RelativePath=".\CalculateRMS.cu"
 				>
 			</File>
 			<File
 				RelativePath=".\CorrectWeightsKernel.cu"
+				>
+			</File>
+			<File
+				RelativePath=".\CorrectWeightsSelInputs.cu"
 				>
 			</File>
 			<File
@@ -613,6 +621,10 @@
 			</File>
 			<File
 				RelativePath=".\RobustLearning.cu"
+				>
+			</File>
+			<File
+				RelativePath=".\SelectiveInputs.cu"
 				>
 			</File>
 		</Filter>

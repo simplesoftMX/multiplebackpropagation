@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -94,7 +94,7 @@ class MultipleBackPropagation : public BackPropagation {
 		               trained with the Back-Propagation Algorithm.
 		 Version     : 1.0.0
 		*/
-		MultipleBackPropagation(Array<int> & layersSize, List< Array<activation_function> > & activationFunction, List< Array<double> > & activationFunctionParameter, BOOL connectInputLayerToOutputLayer, Array<int> & layersSizeSpaceNet, List< Array<activation_function> > & activationFunctionSpaceNet, List< Array<double> > & activationFunctionParameterSpaceNet, BOOL connectSpaceInputLayerToOutputLayer, Array<int> & neuronsWithSelectiveActivation) {
+		MultipleBackPropagation(Array<int> & layersSize, List< Array<activation_function> > & activationFunction, List< Array<double> > & activationFunctionParameter, BOOL connectInputLayerToOutputLayer, Array<int> & layersSizeSpaceNet, List< Array<activation_function> > & activationFunctionSpaceNet, List< Array<double> > & activationFunctionParameterSpaceNet, BOOL connectSpaceInputLayerToOutputLayer, Array<int> & neuronsWithSelectiveActivation, Array<bool> & inputMissingValues) {
 			Layer * prevLayer;
 
 			int numberLayers = layersSize.Lenght();
@@ -102,7 +102,7 @@ class MultipleBackPropagation : public BackPropagation {
 
 			if (layersSizeSpaceNet.Lenght() > 1) {
 				// Create the space network
-				spaceNetwork = new BackPropagation(layersSizeSpaceNet, activationFunctionSpaceNet, activationFunctionParameterSpaceNet, connectSpaceInputLayerToOutputLayer);
+				spaceNetwork = new BackPropagation(layersSizeSpaceNet, activationFunctionSpaceNet, activationFunctionParameterSpaceNet, connectSpaceInputLayerToOutputLayer, inputMissingValues);
 
 				// Initialize the mk's
 				mk.Resize(spaceNetwork->Outputs());
@@ -113,7 +113,7 @@ class MultipleBackPropagation : public BackPropagation {
 
 			// Add an Input Layer
 			inputs = layersSize[0];
-			Layer * inputLayer = prevLayer = static_cast<Layer *>(new InputLayer(inputs));
+			Layer * inputLayer = prevLayer = static_cast<Layer *>(new InputLayer(inputs, inputMissingValues));
 			layers.Add(prevLayer);
 
 			double * mkp = mk.Pointer();
@@ -211,6 +211,10 @@ class MultipleBackPropagation : public BackPropagation {
 
 		void SpaceWeights(int layer, int neuron, Array<double> & weights) {
 			spaceNetwork->Weights(layer, neuron, weights);
+		}
+
+		void SpaceWeightsMissingValueNeuron(int neuron, double & bias, double & weight) {
+			spaceNetwork->WeightsMissingValueNeuron(neuron, bias, weight);
 		}
 
 		/**

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="MBackProp"
 	ProjectGUID="{8C64159D-5950-4595-9C66-BDD14D7708CF}"
 	RootNamespace="MBackProp"
@@ -719,6 +719,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Layer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\LearningMomentumDialog.h"
 				>
 			</File>
@@ -752,6 +756,10 @@
 			</File>
 			<File
 				RelativePath=".\multiplebackpropagation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Neuron.h"
 				>
 			</File>
 			<File

@@ -27,6 +27,8 @@
 class VariablesData : public HandleExceptions { // Read the variables data from a file
 	private :
 		Array<CString> names;
+		Array<bool> missingValues;
+
 		Matrix<double> data;
 
 		/**
@@ -216,6 +218,10 @@ class VariablesData : public HandleExceptions { // Read the variables data from 
 		*/
 		double Minimum(int variable) {
 			return minimum[variable];
+		}
+
+		bool HasMissingValues(int variable) {
+			return missingValues[variable];
 		}
 };
 

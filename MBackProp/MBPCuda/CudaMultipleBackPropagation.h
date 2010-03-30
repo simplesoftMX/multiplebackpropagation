@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -29,9 +29,7 @@
 #ifndef CudaMultipleBackPropagation_h
 #define CudaMultipleBackPropagation_h
 
-#define General_h
-
-//#include <afxwin.h>
+#define General_h // Prevent General.h from being included
 
 #include "../cuda.h"
 #include "../MultipleBackPropagation.h"
@@ -117,6 +115,74 @@ class CudaMultipleBackPropagation {
 				void CorrectWeights(cudaStream_t stream, int patternsBlockSize, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, CUDA_FLOATING_TYPE robustFactor, CUDA_FLOATING_TYPE momentum);
 		};
 
+		class SelectiveInputLayer {
+			friend class CudaMultipleBackPropagation;
+
+			private:
+				int patterns;
+				int neurons;
+
+				DeviceArray<CUDA_FLOATING_TYPE> weights;
+				DeviceArray<CUDA_FLOATING_TYPE> bias;
+				DeviceArray<CUDA_FLOATING_TYPE> bestWeights;
+				DeviceArray<CUDA_FLOATING_TYPE> bestBias;
+				DeviceArray<CUDA_FLOATING_TYPE> learnRate;
+				DeviceArray<CUDA_FLOATING_TYPE> learnRateBias;
+				DeviceArray<CUDA_FLOATING_TYPE> lastDelta;
+				DeviceArray<CUDA_FLOATING_TYPE> lastDeltaBias;
+				DeviceArray<CUDA_FLOATING_TYPE> lastDeltaWithoutLearningMomentum;
+				DeviceArray<CUDA_FLOATING_TYPE> lastDeltaWithoutLearningMomentumBias;
+				DeviceArray<CUDA_FLOATING_TYPE> outputs;
+				DeviceArray<CUDA_FLOATING_TYPE> localGradient;
+
+				CUDA_FLOATING_TYPE * inputs;
+
+				dim3 dimOutputsNeurons;
+
+				int fireBlockSize;
+				int fireBlocks;
+
+				int sharedMemGradients;
+
+			public:
+				SelectiveInputLayer(int patterns, int neurons, int nextLayerNeurons, CUDA_FLOATING_TYPE * inputs, HostArray<CUDA_FLOATING_TYPE> & hweights, HostArray<CUDA_FLOATING_TYPE> & hbias, HostArray<CUDA_FLOATING_TYPE> & hlearnRate,  HostArray<CUDA_FLOATING_TYPE> & hlearnRateBias, HostArray<CUDA_FLOATING_TYPE> & hlastDeltaWithoutLearningMomentum, HostArray<CUDA_FLOATING_TYPE> & hlastDeltaWithoutLearningMomentumBias, HostArray<CUDA_FLOATING_TYPE> & hlastDelta, HostArray<CUDA_FLOATING_TYPE> & hlastDeltaBias) : 
+					weights(hweights), bias(hbias), 
+					outputs(patterns * neurons), 
+					dimOutputsNeurons(nextLayerNeurons, neurons), 
+					localGradient(neurons * patterns), 
+					learnRate(hlearnRate), learnRateBias(hlearnRateBias), 
+					lastDeltaWithoutLearningMomentum(hlastDeltaWithoutLearningMomentum), lastDeltaWithoutLearningMomentumBias(hlastDeltaWithoutLearningMomentumBias),
+					lastDelta(hlastDelta), lastDeltaBias(hlastDeltaBias),
+					bestWeights(neurons), bestBias(neurons)
+				{
+					this->patterns = patterns;
+					this->neurons = neurons;
+					
+					/*int threads = patterns * neurons;
+
+					if (threads >= MAX_THREADS_PER_BLOCK) {
+						fireBlockSize = MAX_THREADS_PER_BLOCK;
+					} else {
+		    	        fireBlockSize = 1;
+						while(fireBlockSize < MAX_THREADS_PER_BLOCK && fireBlockSize < neurons) fireBlockSize <<= 1;
+					}
+
+					fireBlocks = threads / fireBlockSize;
+					if (threads % fireBlockSize != 0) fireBlocks++;*/
+
+					sharedMemGradients = (nextLayerNeurons * (neurons + 1)) * sizeof(CUDA_FLOATING_TYPE);
+
+					this->inputs = inputs;
+				}
+
+				void Fire(cudaStream_t stream);
+				void CalculateLocalGradient(cudaStream_t stream, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, DeviceLayer * nextLayer);
+				void CudaMultipleBackPropagation::SelectiveInputLayer::CorrectWeights(cudaStream_t stream, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, CUDA_FLOATING_TYPE robustFactor, CUDA_FLOATING_TYPE momentum);
+		};
+
+		Pointer<SelectiveInputLayer> selectiveInputLayer;
+		Pointer<SelectiveInputLayer> selectiveInputLayerSpaceNetwork;
+
 		List<DeviceLayer> layersSpaceNetwork;
 		List<DeviceLayer> layers;
 
@@ -145,7 +211,9 @@ class CudaMultipleBackPropagation {
 		int patternsBlockSize;
 		CUDA_FLOATING_TYPE numberPatternsNeurons;
 
-		void CreateDeviceLayers(List<Layer> & hostLayers, List<DeviceLayer> & deviceLayers, int patterns, int * neuronsWithSelectiveActivation);
+		SelectiveInputLayer * CudaMultipleBackPropagation::CreateSelectiveInputLayer(InputLayer * l, Pointer <MultipleBackPropagation> & mbp, int patterns);
+		void CreateDeviceLayers(List<Layer> & hostLayers, List<DeviceLayer> & deviceLayers, int patterns, int * neuronsWithSelectiveActivation, Pointer<SelectiveInputLayer> & sil);
+
 		void CopyLayersToHost(List<DeviceLayer> & deviceLayers, List<Layer> & hostLayers);
 
 	public:
@@ -153,12 +221,13 @@ class CudaMultipleBackPropagation {
 
 		~CudaMultipleBackPropagation();
 
-		void Train(double momentum, double spaceMomentum, bool robustLearning, double rmsGrowToApplyRobustLearning, double robustFactor);
+		void Train(CUDA_FLOATING_TYPE momentum, CUDA_FLOATING_TYPE spaceMomentum, bool robustLearning, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, CUDA_FLOATING_TYPE robustFactor);
 
 		CUDA_FLOATING_TYPE GetRMS() {
 			return *rms;
 		}
 
+		void CopySelectiveInputLayerToHost(SelectiveInputLayer * l, InputLayer * hl);
 		void CopyNetworkHost(Pointer <MultipleBackPropagation> & mbp);
 };
 

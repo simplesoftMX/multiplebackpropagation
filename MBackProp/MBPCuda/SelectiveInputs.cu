@@ -18,34 +18,27 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/**
- File      : Main include file for the ActiveX Control DLL.
- Date      : 4 of July of 1999
- Reviewed  : 27 of December of 2005
-*/
+#include "MBPkernels.h"
+#include "../MissingValues.h"
 
-#pragma once
+#define NEURON threadIdx.x
+#define NUM_NEURONS blockDim.x
+#define PATTERN blockIdx.x
 
-#if !defined( __AFXCTL_H__ )
-#error "include 'afxctl.h' before including this file"
-#endif
+//WARNING: Currently this function supports only a maximumj of 512 inputs (A new and better implementation must be analysed)
+KERNEL FireSelectiveInputs(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * bias, CUDA_FLOATING_TYPE * outputs) {
+	int idx = PATTERN * NUM_NEURONS + NEURON;
 
-#include "resource.h"       // main symbols
+	CUDA_FLOATING_TYPE o = inputs[idx];
 
-/**
- Constant : extern const GUID CDECL _tlid
- Purpose  : Contains the type library ID.
-*/
-extern const GUID CDECL _tlid;
+	if (o > CUDA_MISSING_VALUE) {
+		o = CUDA_VALUE(0.0);
+	} else {
+		CUDA_FLOATING_TYPE w = weights[NEURON];
+		CUDA_FLOATING_TYPE b = bias[NEURON];
 
-/**
- Constant : extern const WORD _wVerMajor
- Purpose  : Contains the major version of the library.
-*/
-extern const WORD _wVerMajor;
+		if (w != CUDA_VALUE(0.0) || b != CUDA_VALUE(0.0)) o = CUDA_TANH(o * w + b); // input may have missing values		
+	}
 
-/**
- Constant : extern const WORD _wVerMinor
- Purpose  : Contains the minor vesion of the library.
-*/
-extern const WORD _wVerMinor;
+	outputs[idx] = o;
+}

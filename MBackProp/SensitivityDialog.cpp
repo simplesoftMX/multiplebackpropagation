@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -136,7 +136,7 @@ BOOL SensitivityDialog::OnInitDialog() {
 
 	MBPGrid::Grid ^ grid = Container::grid;
 
-	grid->Rows = mbp->HasSpaceNetwork() ? 26 : 11;
+	grid->Rows = (mbp->HasSpaceNetwork()) ? 26 : 11;
 	grid->Columns = lastCol + 1;
 
 	if (mbp->HasSpaceNetwork()) {
@@ -212,8 +212,10 @@ BOOL SensitivityDialog::OnInitDialog() {
 				if (n < 4) {
 					double noise = (n + 1) * 0.02;
 					for (int r = 0; r < rows; r++) {
-						trainInputPatterns[r][i] += noise;
-						trainInputPatterns[rows + r][i] -= noise;
+						if (trainInputPatterns[r][i] != MISSING_VALUE) {
+							trainInputPatterns[r][i] += noise;
+							trainInputPatterns[rows + r][i] -= noise;
+						}
 					}
 				} else {
 					double noise = -1.0 + (n - 4) * +1.0;
@@ -279,8 +281,10 @@ BOOL SensitivityDialog::OnInitDialog() {
 				if (n < 4) {
 					double noise = (n + 1) * 0.02;
 					for (int r = 0; r < rows; r++) {
-						testInputPatterns[r][i] += noise;
-						testInputPatterns[rows + r][i] -= noise;
+						if (testInputPatterns[r][i] != MISSING_VALUE) {
+							testInputPatterns[r][i] += noise;
+							testInputPatterns[rows + r][i] -= noise;
+						}
 					}
 				} else {
 					double noise = -1.0 + (n - 4) * 1.0;

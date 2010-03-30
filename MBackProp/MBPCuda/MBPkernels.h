@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -40,6 +40,13 @@ KERNEL RobustLearning(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, C
 KERNEL CalculateLocalGradient(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * outputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * m, int mOffset, int totalNeuronsWithSelectiveActivation, CUDA_FLOATING_TYPE * localGradientNextLayer, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * localGradientSpaceNet);
 
 void KernelCorrectLayerWeights(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * learningRate, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentum, CUDA_FLOATING_TYPE * lastDelta, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE momentum, int numberPatterns);
+
+// Missing values kernels
+
+KERNEL FireSelectiveInputs(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * bias, CUDA_FLOATING_TYPE * outputs);
+KERNEL CalcLocalGradSelectiveInputs(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * selectiveNeuronsWeights, CUDA_FLOATING_TYPE * selectiveNeuronsBias, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * localGradientNextLayer, CUDA_FLOATING_TYPE * localGradient);
+void KernelCorrectWeightsSelectiveInputs(cudaStream_t stream, int neurons, int patterns, CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * selectiveNeuronsWeights, CUDA_FLOATING_TYPE * selectiveNeuronsBias, CUDA_FLOATING_TYPE * learningRateWeights, CUDA_FLOATING_TYPE * learningRateBias, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentumWeights, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentumBias, CUDA_FLOATING_TYPE * lastDeltaWeights, CUDA_FLOATING_TYPE * lastDeltaBias, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE momentum, int numberPatterns);
+
 
 //#include "LearningConfig.h"
 

@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -29,6 +29,20 @@
 void BackPropagation::LoadWeights(InputFile & f, bool loadAditionalVars) {
 	CString s;
 
+	InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+	if (inputLayer->CanHaveMissingValues()) {
+		List<Neuron> * inputNeurons = &(inputLayer->neurons);
+
+		for (InputNeuron * n = static_cast<InputNeuron *>(inputNeurons->First()); n != NULL; n = static_cast<InputNeuron *>(inputNeurons->Next())) {
+			if (n->CanHaveMissingValues()) {
+				List<Connection> * inputConnections = &(n->GetNeuronMissingValues()->inputs);
+				for (Connection * c = inputConnections->First(); c != NULL; c = inputConnections->Next()) {
+					if (!c->Load(f, loadAditionalVars)) throw BasicException("Can not recognize the file format.");
+				}
+			}
+		}
+	}
+
 	int numberLayers = layers.Lenght();
 
 	for (int l = 1; l < numberLayers; l++) {
@@ -41,19 +55,7 @@ void BackPropagation::LoadWeights(InputFile & f, bool loadAditionalVars) {
 
 			List<Connection> * inputConnections = &(neuron->inputs);
 			for (Connection * c = inputConnections->First(); c != NULL; c = inputConnections->Next()) {
-				if (!f.ReadLine(s)) throw BasicException("Can not recognize the file format.");
-				c->weight = StringToDouble(s);
-
-				if (loadAditionalVars) {
-					if (!f.ReadLine(s)) throw BasicException("Can not recognize the file format.");
-					c->delta = StringToDouble(s);
-
-					if (!f.ReadLine(s)) throw BasicException("Can not recognize the file format.");
-					c->deltaWithoutLearningMomentum = StringToDouble(s);
-
-					if (!f.ReadLine(s)) throw BasicException("Can not recognize the file format.");
-					c->learningRate = StringToDouble(s);
-				}
+				if (!c->Load(f, loadAditionalVars)) throw BasicException("Can not recognize the file format.");
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
@@ -104,7 +104,7 @@ class LayerConnectedToOtherLayer : public Layer {
 				for (NeuronWithOutputConnections * o = dynamic_cast<NeuronWithOutputConnections *>(previousLayer->neurons.First()); o != NULL; o = dynamic_cast<NeuronWithOutputConnections *>(previousLayer->neurons.Next())) {
 					Pointer<Connection> c = new Connection();
 
-					o->outputs.Add(c);
+					o->AddConnection(c);
 					i->inputs.Add(c);
 				}
 			}
@@ -120,15 +120,25 @@ class LayerConnectedToOtherLayer : public Layer {
  Version  : 1.0.0 
 */
 class InputLayer : public Layer {
+	private:
+		bool canHaveMissingValues;
+
 	public :
 		/**
-		 Constructor : InputLayer(int numberNeurons)
+		 Constructor : InputLayer(int numberNeurons, Array<bool> & inputMissingValues)
 		 Purpose     : Create the neurons that compose the input layer.
 		 Version     : 1.0.0
 		*/
-		InputLayer(int numberNeurons) {
+		InputLayer(int numberNeurons, Array<bool> & inputMissingValues) {
+			canHaveMissingValues = false;
+
 			assert(numberNeurons > 0);
-			for(int n=0; n<numberNeurons; n++) neurons.Add(static_cast<Neuron *>(new InputNeuron));
+			for(int n=0; n<numberNeurons; n++) {
+				bool missingValues = inputMissingValues[n];
+				if (missingValues) canHaveMissingValues = true;
+
+				neurons.Add(static_cast<Neuron *>(new InputNeuron(missingValues)));
+			}
 		}
 
 		/**
@@ -146,6 +156,10 @@ class InputLayer : public Layer {
 			}
 
 			Fire();
+		}
+
+		bool CanHaveMissingValues() const {
+			return canHaveMissingValues;
 		}
 };
 

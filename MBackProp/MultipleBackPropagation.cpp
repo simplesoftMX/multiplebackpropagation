@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -22,12 +22,7 @@
 #include "MultipleBackPropagation.h"
 #include "MBackProp.h"
 
-/**
- Method   : void GenerateCCode(OutputFile & f)
- Purpose  : Write C code for corresponding to the 
-            feed forward network into a given file.
- Version  : 1.0.1
-*/
+// Write C code for corresponding to the feed forward network into a given file.
 void MultipleBackPropagation::GenerateCCode(OutputFile & f, VariablesData & trainVariables, BOOL inputLayerIsConnectedWithOutputLayer, BOOL spaceInputLayerIsConnectedWithOutputLayer) {
 	CString s;
 
@@ -43,20 +38,35 @@ void MultipleBackPropagation::GenerateCCode(OutputFile & f, VariablesData & trai
 	
 	f.WriteLine("/**");
 	s.Format(_TEXT(" inputs  - should be an array of %d element(s), containing the network input(s)."), inputs);
+
+	bool hasMissingValues = false;
+	for(int i = 0; i < inputs; i++) {
+		if (trainVariables.HasMissingValues(i)) {
+			s += " Inputs with NaN value are considered missing values.";
+			hasMissingValues = true;
+			break;
+		}
+	}
+
 	f.WriteLine(s);
+		
 	s.Format(_TEXT(" outputs - should be an array of %d element(s), that will contain the network output(s)."), outputs);
 	f.WriteLine(s);
-	f.WriteLine(" Note : The array inputs will also be changed. Its values will be rescaled between -1 and 1.\n*/");
+	s = " Note : The array inputs will also be changed.";
+	if (!hasMissingValues) s += "Its values will be rescaled between -1 and 1.";
+	s += "\n*/";
+	f.WriteLine(s);
 
 	s = f.GetFileName();
 	int p = s.Find('.');
-	if (p != -1) s = s.Left(p);	
+	if (p != -1) s = s.Left(p);
 	f.WriteLine(_TEXT("void ") +  s + _TEXT("(double * inputs, double * outputs) {"));
 
 	f.WriteString("\tdouble mainWeights[] = {");
 	SaveWeights(f, ", ");
 	f.WriteLine("};");
 	f.WriteLine("\tdouble * mw = mainWeights;");
+	if (hasMissingValues) f.WriteLine("\tdouble b;");
 
 	if (!spaceNetwork.IsNull()) {
 		f.WriteString("\tdouble spaceWeights[] = {");
@@ -66,12 +76,17 @@ void MultipleBackPropagation::GenerateCCode(OutputFile & f, VariablesData & trai
 		s.Format(_TEXT("\tdouble mk[%d];"), spaceNetwork->Outputs());
 		f.WriteLine(s);
 		f.WriteLine("\tdouble *m = mk;");
+		
+		if (hasMissingValues) {
+			s.Format(L"\tdouble spaceInputs[%d];", inputs);
+			f.WriteLine(s);
+		}
 	}
 
 	int numberLayers = layers.Lenght();
 
 	for (int l = 1; l < numberLayers - 1; l++) {
-		s.Format(_TEXT("\tdouble hiddenLayer%doutputs[%d];"), l, layers.Element(l)->neurons.Lenght());
+		s.Format(L"\tdouble hiddenLayer%doutputs[%d];", l, layers.Element(l)->neurons.Lenght());
 		f.WriteLine(s);
 	}
 
@@ -92,9 +107,38 @@ void MultipleBackPropagation::GenerateCCode(OutputFile & f, VariablesData & trai
 			double min = trainVariables.Minimum(i);
 			double max = trainVariables.Maximum(i);
 
+			if (trainVariables.HasMissingValues(i)) {
+				s.Format(L"\tif(inputs[%d] == inputs[%d]) { /* compiler must have support for NaN numbers */\n\t", i, i);
+				f.WriteString(s);
+			}
+
 			if (min != max) {
-				s.Format(_TEXT("\tinputs[%d] = -1.0 + (inputs[%d] - %1.15f) / %1.15f;"), i, i, min, (max - min)/2);
+				s.Format(L"\tinputs[%d] = -1.0 + (inputs[%d] - %1.15f) / %1.15f;", i, i, min, (max - min)/2);				
+			} else {
+				s.Format(L"\tinputs[%d] = inputs[%d] / %1.15f; /* WARNING: During the training this variable remain always constant */", i, i, max);
+			}
+			f.WriteLine(s);
+
+			if (hasMissingValues && !spaceNetwork.IsNull()) {
+				if (trainVariables.HasMissingValues(i)) f.WriteString("\t");
+				s.Format(L"\tspaceInputs[%d] = inputs[%d];", i, i);
 				f.WriteLine(s);
+			}
+
+			if (trainVariables.HasMissingValues(i)) {
+				if (!spaceNetwork.IsNull()) {
+					f.WriteLine("\t\tb = *sw++;");
+					s.Format(L"\t\tspaceInputs[%d] = tanh(b + spaceInputs[%d] * *sw++);", i, i);
+					f.WriteLine(s);
+				}
+
+				f.WriteLine("\t\tb = *mw++;");
+				s.Format(L"\t\tinputs[%d] = tanh(b + inputs[%d] * *mw++);", i, i);
+				f.WriteLine(s);
+				f.WriteLine("\t} else {");
+				s.Format(L"\t\tspaceInputs[%d] = inputs[%d] = 0.0;", i, i);
+				f.WriteLine(s);
+				f.WriteLine("\t}");
 			}
 		}
 	}
@@ -126,17 +170,17 @@ void MultipleBackPropagation::GenerateCCode(OutputFile & f, VariablesData & trai
 			f.WriteString(" += *sw++ * ");
 
 			if (l == 1) {
-				s = "inputs[c];";
+				s = (hasMissingValues) ? "spaceI" : "i";
+				s+= "nputs[c];";
 			} else {
 				s.Format(_TEXT("spaceHiddenLayer%doutputs[c];"), l-1);
 			}
-
 			f.WriteLine(s);
 
 			if (spaceInputLayerIsConnectedWithOutputLayer  && l == numberSpaceLayers -1) {
 				s.Format(_TEXT("\tfor(c = 0; c < %d; c++) "), inputs);
 				f.WriteString(s);
-				f.WriteLine(aux + _TEXT(" += *sw++ * inputs[c];"));
+				f.WriteLine(aux + L" += *sw++ * " + ((hasMissingValues) ? "spaceI" : "i") + "nputs[c];");
 			}
 
 			WriteActivationFunctionCCode(f, n, aux);

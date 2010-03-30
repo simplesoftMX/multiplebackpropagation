@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -18,34 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/**
- File      : Main include file for the ActiveX Control DLL.
- Date      : 4 of July of 1999
- Reviewed  : 27 of December of 2005
-*/
-
-#pragma once
-
-#if !defined( __AFXCTL_H__ )
-#error "include 'afxctl.h' before including this file"
+#ifndef MISSING_VALUE
+	// After being rescaled the inputs and the outputs have a maximum value of 1.0, thus a higher value can be used to represent a missing value
+	#define MISSING_VALUE (8.0)
+	#define CUDA_MISSING_VALUE (7.0f) // For test purposes only. Any value greather than this will be considered a missing value. This is to avoid possible rounding problems.
 #endif
-
-#include "resource.h"       // main symbols
-
-/**
- Constant : extern const GUID CDECL _tlid
- Purpose  : Contains the type library ID.
-*/
-extern const GUID CDECL _tlid;
-
-/**
- Constant : extern const WORD _wVerMajor
- Purpose  : Contains the major version of the library.
-*/
-extern const WORD _wVerMajor;
-
-/**
- Constant : extern const WORD _wVerMinor
- Purpose  : Contains the minor vesion of the library.
-*/
-extern const WORD _wVerMinor;

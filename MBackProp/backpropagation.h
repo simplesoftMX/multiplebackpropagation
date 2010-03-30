@@ -1,5 +1,5 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
     Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
@@ -150,6 +150,19 @@ class BackPropagation {
 					}
 				}
 			}
+
+			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+			if (inputLayer->CanHaveMissingValues()) {
+				List<Neuron> * inputNeurons = &(inputLayer->neurons);
+
+				for (InputNeuron * n = static_cast<InputNeuron *>(inputNeurons->First()); n != NULL; n = static_cast<InputNeuron *>(inputNeurons->Next())) {
+					if (deltaBarDelta) {
+						n->EndWeigthsCorrectionMissingValue(momentum, numberPatterns);
+					} else {
+						n->EndWeigthsCorrectionMissingValue(learningRate, momentum, numberPatterns);
+					}
+				}
+			}
 		}
 
 	public :
@@ -183,6 +196,18 @@ class BackPropagation {
 						
 					List<Connection> * inputConnections = &(neuron->inputs);
 					for (Connection * c = inputConnections->First(); c != NULL; c = inputConnections->Next()) c->learningRate = rate;
+				}
+			}
+
+			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+			if (inputLayer->CanHaveMissingValues()) {
+				List<Neuron> * layerNeurons = &(inputLayer->neurons);
+
+				int numberNeurons = layerNeurons->Lenght();
+
+				for (int n = 0; n < numberNeurons; n++) {
+					InputNeuron * neuron = static_cast<InputNeuron *>(layerNeurons->Element(n));
+					neuron->SetLearningRateMissingValue(rate);
 				}
 			}
 		}
@@ -220,7 +245,7 @@ class BackPropagation {
 		               trained with the Back-Propagation Algorithm.
 		 Version     : 1.4.0
 		*/
-		BackPropagation(Array<int> & layersSize, List< Array<activation_function> > & activationFunction, List< Array<double> > & activationFunctionParameter, BOOL connectInputLayerToOutputLayer) {	
+		BackPropagation(Array<int> & layersSize, List< Array<activation_function> > & activationFunction, List< Array<double> > & activationFunctionParameter, BOOL connectInputLayerToOutputLayer, Array<bool> & inputMissingValues) {
 			Layer * prevLayer;
 
 			int numberLayers = layersSize.Lenght();
@@ -228,7 +253,7 @@ class BackPropagation {
 
 			// Add an Input Layer
 			inputs = layersSize[0];
-			Layer * inputLayer = prevLayer = static_cast<Layer *>(new InputLayer(inputs));
+			Layer * inputLayer = prevLayer = static_cast<Layer *>(new InputLayer(inputs, inputMissingValues));
 			layers.Add(prevLayer);
 
 			// Add the Hidden Layers
@@ -282,6 +307,18 @@ class BackPropagation {
 						
 					List<Connection> * inputConnections = &(neuron->inputs);
 					for (Connection * c = inputConnections->First(); c != NULL; c = inputConnections->Next()) c->weight *= factor;
+				}
+			}
+
+			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+			if (inputLayer->CanHaveMissingValues()) {
+				List<Neuron> * layerNeurons = &(inputLayer->neurons);
+
+				int numberNeurons = layerNeurons->Lenght();
+
+				for (int n = 0; n < numberNeurons; n++) {
+					InputNeuron * neuron = static_cast<InputNeuron *>(layerNeurons->Element(n));
+					neuron->DecayWeightsMissingValue(factor);
 				}
 			}
 		}
@@ -346,6 +383,23 @@ class BackPropagation {
 					}
 				}
 			}
+
+			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+			if (inputLayer->CanHaveMissingValues()) {
+				List<Neuron> * inputNeurons = &(inputLayer->neurons);
+
+				for (InputNeuron * n = static_cast<InputNeuron *>(inputNeurons->First()); n != NULL; n = static_cast<InputNeuron *>(inputNeurons->Next())) {
+					n->DetermineErrorMissingValue();
+					// Now that the error is known, corrections can be made to the weights of the neuron input connections
+					if (batchTraining) {
+						n->CorrectWeigthsInBatchModeMissingValue();
+					} else if (deltaBarDelta) {
+						n->CorrectWeigthsMissingValue(momentum);
+					} else {
+						n->CorrectWeigthsMissingValue(learningRate, momentum);
+					}
+				}
+			}
 		}
 
 		/**
@@ -365,6 +419,19 @@ class BackPropagation {
 				for (int n = 0; n < numberNeurons; n++) {
 					NeuronWithInputConnections * neuron = dynamic_cast<NeuronWithInputConnections *>(layerNeurons->Element(n));
 					neuron->UpdateLearning();
+				}
+			}
+
+			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+			if (inputLayer->CanHaveMissingValues()) {
+				List<Neuron> * layerNeurons = &(inputLayer->neurons);
+
+				int numberNeurons = layerNeurons->Lenght();
+
+				for (int n = 0; n < numberNeurons; n++) {
+					InputNeuron * neuron = static_cast<InputNeuron *>(layerNeurons->Element(n));
+
+					neuron->UpdateLearningMissingValue();
 				}
 			}
 		}
@@ -388,6 +455,19 @@ class BackPropagation {
 					neuron->CorrectLearning(learningCorrectionFactor);
 				}
 			}
+
+			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+			if (inputLayer->CanHaveMissingValues()) {
+				List<Neuron> * layerNeurons = &(inputLayer->neurons);
+
+				int numberNeurons = layerNeurons->Lenght();
+
+				for (int n = 0; n < numberNeurons; n++) {
+					InputNeuron * neuron = static_cast<InputNeuron *>(layerNeurons->Element(n));
+
+					neuron->CorrectLearningMissingValue(learningCorrectionFactor);
+				}
+			}
 		}
 
 		/**
@@ -409,6 +489,19 @@ class BackPropagation {
 					neuron->Rewind(clearDeltas, rewindLearnRates);
 				}
 			}
+
+			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+			if (inputLayer->CanHaveMissingValues()) {
+				List<Neuron> * layerNeurons = &(inputLayer->neurons);
+
+				int numberNeurons = layerNeurons->Lenght();
+
+				for (int n = 0; n < numberNeurons; n++) {
+					InputNeuron * neuron = static_cast<InputNeuron *>(layerNeurons->Element(n));
+
+					neuron->RewindMissingValue(clearDeltas, rewindLearnRates);
+				}
+			}
 		}
 
 		/**
@@ -427,6 +520,19 @@ class BackPropagation {
 				for (int n = 0; n < numberNeurons; n++) {
 					NeuronWithInputConnections * neuron = dynamic_cast<NeuronWithInputConnections *>(layerNeurons->Element(n));
 					neuron->KeepState();
+				}
+			}
+
+			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+			if (inputLayer->CanHaveMissingValues()) {
+				List<Neuron> * layerNeurons = &(inputLayer->neurons);
+
+				int numberNeurons = layerNeurons->Lenght();
+
+				for (int n = 0; n < numberNeurons; n++) {
+					InputNeuron * neuron = static_cast<InputNeuron *>(layerNeurons->Element(n));
+
+					neuron->KeepStateMissingValue();
 				}
 			}
 		}
@@ -501,28 +607,8 @@ class BackPropagation {
 			return outputs;
 		}
 
-		/**
-		 Method   : void SaveWeights(OutputFile & f)
-		 Purpose  : Save the network weights to a given file. 
-		 Version  : 1.0.0
-		*/
-		void SaveWeights(OutputFile & f, char * separator = "\n", bool saveAditionalVars = false) {
-			CString s;
-
-			int numberLayers = layers.Lenght();
-
-			for (int l = 1; l < numberLayers; l++) {
-				List<Neuron> * layerNeurons = &(layers.Element(l)->neurons);
-
-				int numberNeurons = layerNeurons->Lenght();
-
-				for (int n = 0; n < numberNeurons; n++) {
-					NeuronWithInputConnections * neuron = dynamic_cast<NeuronWithInputConnections *>(layerNeurons->Element(n));
-
-					List<Connection> * inputConnections = &(neuron->inputs);
-					Connection * c = inputConnections->First();
-					while(c != NULL) {
-						s.Format(_TEXT("%1.15f"), c->weight);
+		/*void SaveNeuronInfo(Connection * c, bool saveAditionalVars) { // Used by SaveWeights method
+			s.Format(_TEXT("%1.15f"), c->weight);
 						f.WriteString(s);
 
 						if (saveAditionalVars) {
@@ -538,6 +624,47 @@ class BackPropagation {
 							s.Format(_TEXT("%1.15f"), c->learningRate);
 							f.WriteString(s);
 						}
+
+		}*/
+
+		/**
+		 Method   : void SaveWeights(OutputFile & f)
+		 Purpose  : Save the network weights to a given file. 
+		 Version  : 1.0.0
+		*/
+		void SaveWeights(OutputFile & f, char * separator = "\n", bool saveAditionalVars = false) {
+			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+			if (inputLayer->CanHaveMissingValues()) {
+				List<Neuron> * inputNeurons = &(inputLayer->neurons);
+
+				for (InputNeuron * n = static_cast<InputNeuron *>(inputNeurons->First()); n != NULL; n = static_cast<InputNeuron *>(inputNeurons->Next())) {
+					if (n->CanHaveMissingValues()) {
+						List<Connection> * inputConnections = &(n->GetNeuronMissingValues()->inputs);
+						Connection * c = inputConnections->First();
+						while(c != NULL) {
+							c->Save(f, separator, saveAditionalVars);
+
+							c = inputConnections->Next();
+							if (c != NULL || strcmp(separator, "\n") == 0) f.WriteString(separator);
+						}
+					}
+				}
+			}
+
+			int numberLayers = layers.Lenght();
+
+			for (int l = 1; l < numberLayers; l++) {
+				List<Neuron> * layerNeurons = &(layers.Element(l)->neurons);
+
+				int numberNeurons = layerNeurons->Lenght();
+
+				for (int n = 0; n < numberNeurons; n++) {
+					NeuronWithInputConnections * neuron = dynamic_cast<NeuronWithInputConnections *>(layerNeurons->Element(n));
+
+					List<Connection> * inputConnections = &(neuron->inputs);
+					Connection * c = inputConnections->First();
+					while(c != NULL) {
+						c->Save(f, separator, saveAditionalVars);
 
 						c = inputConnections->Next();
 						if (c != NULL || l < numberLayers - 1 || n < numberNeurons - 1 || strcmp(separator, "\n") == 0) f.WriteString(separator);
@@ -556,6 +683,15 @@ class BackPropagation {
 				weights[w++] = c->weight;
 			}
 		}
+
+		void WeightsMissingValueNeuron(int neuron, double & bias, double & weight) {
+			InputNeuron * n = static_cast<InputNeuron *>(layers.Element(0)->neurons.Element(neuron));
+
+			List<Connection> * inputConnections = &(n->GetNeuronMissingValues()->inputs);
+			bias = inputConnections->Element(0)->weight;
+			weight = inputConnections->Element(1)->weight;
+		}
+
 		
 		/**
 		 Method   : virtual CString Weights()
@@ -622,6 +758,17 @@ class BackPropagation {
 		 Version  : 1.0.0
 		*/
 		void LoadWeights(InputFile & f, bool loadAditionalVars = false);
+
+		bool InputCanHaveMissingValues(int input) {
+			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
+
+			if (inputLayer->CanHaveMissingValues()) {
+				InputNeuron * neuron = static_cast<InputNeuron *>(inputLayer->neurons.Element(input));
+				return neuron->CanHaveMissingValues();
+			}
+
+			return false;
+		}
 };
 
 #endif

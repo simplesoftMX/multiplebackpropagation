@@ -1,6 +1,6 @@
 /*
-	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Noel de Jesus Mendonça Lopes
+	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
@@ -43,6 +43,7 @@
 #include "ActivationFunctions.h"
 #include "Connection.h"
 #include "../Common/Pointers/List.h"
+#include "MissingValues.h"
 
 /**
  Class    : Neuron
@@ -98,7 +99,7 @@ class NeuronWithInputConnections : public Neuron {
 		*/	
 		double Output() {
 			// Determine the neuron input
-			double input = 0;
+			double input = 0.0;
 			for (Connection * c = inputs.First(); c != NULL; c = inputs.Next()) {
 				input += c->Signal();
 			}
@@ -234,12 +235,7 @@ class NeuronWithInputConnections : public Neuron {
 			}
 		}
 
-		/**
-		 Method   : void EndWeigthsCorrection(double learningRate, double momentum)
-		 Purpose  : Finalize the wheights correction of all the connections.
-		 Comments : Used in the batch update method.
-		 Version  : 1.0.0
-		*/
+		// Finalize the weigths correction of all the connections (Used in the batch update method)
 		void EndWeigthsCorrection(double learningRate, double momentum, int numberPatterns) {
 			for (Connection * c = inputs.First(); c != NULL; c = inputs.Next()) {
 				c->newDelta *= learningRate / numberPatterns;
@@ -248,12 +244,7 @@ class NeuronWithInputConnections : public Neuron {
 			}
 		}
 
-		/**
-		 Method   : void EndWeigthsCorrection(double momentum)
-		 Purpose  : Finalize the wheights correction of all the connections.
-		 Comments : Used by the Delta-Bar-Delta algorithm.
-		 Version  : 1.0.0
-		*/
+		// Finalize the weigths correction of all the connections (Used by the Delta-Bar-Delta algorithm)
 		void EndWeigthsCorrection(double momentum, int numberPatterns) {
 			for (Connection * c = inputs.First(); c != NULL; c = inputs.Next()) c->UpdateWeightAndLearningRate(momentum, numberPatterns);
 		}
@@ -277,60 +268,21 @@ class NeuronWithInputConnections : public Neuron {
 		Pointer<ActivationFunction> function;
 };
 
-/**
- Class    : NeuronWithOutputConnections
- Puropse  : Base class for all neuron classes that send 
-            its output through several connections.
- Author   : Noel de Jesus Mendonça Lopes
- Date     : 20 of June of 1999
- Reviewed : 26 of December of 1999
- Version  : 1.2.0
- Comments : This is an abstract class.
-*/
+// Represents a neuron with output connections (abstract class)
+// Base class for all neuron classes that send its output through several connections.
 class NeuronWithOutputConnections : public Neuron {
-	public :
-		/**
-		 Attribute : List<Connection> outputs
-		 Purpose   : Contains the a list of output connections.
-		*/
+	protected:
+		// list of output connections
 		List<Connection> outputs;
 
-	protected :
-  	/**
-		 Method  : void SendOutput(double output)
-		 Purpose : Sends the neuron output through its output connections.
-		 Version : 1.0.0
-		*/	
+		// Sends the neuron output through its output connections
 		void SendOutput(double output) {
 			for (Connection * c = outputs.First(); c != NULL; c = outputs.Next()) c->input = output;
 		}
-};
 
-/**
- Class    : InputNeuron
- Puropse  : class that represents an input neuron.
- Author   : Noel de Jesus Mendonça Lopes
- Date     : 20 of June of 1999
- Reviewed : 26 of December of 1999
- Version  : 1.0.0
-*/
-class InputNeuron : public NeuronWithOutputConnections {
-	public :
-		/**
-		 Attribute : double input
-		 Purpose   : Contains the neuron input value.
-		*/
-		double input;
-
-		/**
-		 Method   : virtual void Fire()
-		 Purpose  : When Fire method is called the input neuron sends its input
-								throught its output connections. No processing takes place.
-		 Version  : 1.1.0
-		*/
-		void Fire() {
-			SendOutput(input);
-		}
+	public:
+		// Adds a connection to the output connections of the neuron
+		virtual void AddConnection(Pointer<Connection> connection) = 0;
 };
 
 /**
@@ -369,16 +321,13 @@ class OutputNeuron : public NeuronWithInputConnections {
 		}
 };
 
-/**
- Class    : HiddenNeuron
- Puropse  : class that represents an hidden neuron.
- Author   : Noel de Jesus Mendonça Lopes
- Date     : 20 of June of 1999
- Reviewed : 15 of May of 2000
- Version  : 1.1.0
-*/
+// Represents an hidden neuron
 class HiddenNeuron : virtual public NeuronWithInputConnections, virtual public NeuronWithOutputConnections {
 	public :
+		void AddConnection(Pointer<Connection> connection) {
+			outputs.Add(connection);
+		}
+
 		/**
 		 Constructor : HiddenNeuron(ActivationFunction * f)
 		 Purpose     : Create an hidden neuron with a given activation function f.
@@ -428,6 +377,132 @@ class HiddenNeuron : virtual public NeuronWithInputConnections, virtual public N
 			}
 
 			return importanceError * function->LastOutput();
+		}
+};
+
+/**
+ Class    : InputNeuron
+ Puropse  : class that represents an input neuron.
+ Author   : Noel de Jesus Mendonça Lopes
+ Date     : 20 of June of 1999
+ Reviewed : 26 of December of 1999
+ Version  : 1.0.0
+*/
+class InputNeuron : public NeuronWithOutputConnections {
+	public:
+		class NeuronMissingValues : public HiddenNeuron {
+			public:
+				Pointer<Connection> inputConnection;
+				double importance;
+
+				// COMMENT : The tanh function is used because the inputs are rescaled between -1 and 1
+				NeuronMissingValues() : HiddenNeuron(new HyperbolicTangentActivationFunction(1.0)) {
+				//NeuronMissingValues() : HiddenNeuron(new SigmoidLogisticActivationFunction(1.0)) {
+					inputConnection = new Connection();
+					inputs.Add(inputConnection);
+					m = &importance;
+				}
+		};
+
+	private:
+		Pointer<NeuronMissingValues> neuronMissingValues;
+
+	public :
+		// neuron input value
+		double input;
+
+		InputNeuron(bool canHaveMissingValues) {
+			if (canHaveMissingValues) neuronMissingValues = new NeuronMissingValues();
+		}
+
+		void AddConnection(Pointer<Connection> connection) {
+			if (neuronMissingValues.IsNull()) {
+				outputs.Add(connection);
+			} else {
+				neuronMissingValues->AddConnection(connection);
+			}
+		}
+
+		void Fire() {
+			if (neuronMissingValues.IsNull()) {
+				SendOutput(input);
+			} else {
+				neuronMissingValues->inputConnection->input = input;
+				neuronMissingValues->importance = (input == MISSING_VALUE) ? 0.0 : 1.0;
+				neuronMissingValues->Fire();
+			}
+		}
+
+		void EndWeigthsCorrectionMissingValue(double learningRate, double momentum, int numberPatterns) { // Finalize the weigths correction of all the connections (Used in the batch update method)
+			if (!neuronMissingValues.IsNull()) neuronMissingValues->EndWeigthsCorrection(learningRate, momentum, numberPatterns);
+		}
+
+		void EndWeigthsCorrectionMissingValue(double momentum, int numberPatterns) { // Finalize the weigths correction of all the connections (Used by the Delta-Bar-Delta algorithm)
+			if (!neuronMissingValues.IsNull()) neuronMissingValues->EndWeigthsCorrection(momentum, numberPatterns);
+		}
+
+		void SetLearningRateMissingValue(double learningRate) {
+			if (!neuronMissingValues.IsNull()) {
+				List<Connection> * inputConnections = &(neuronMissingValues->inputs);
+				for (Connection * c = inputConnections->First(); c != NULL; c = inputConnections->Next()) c->learningRate = learningRate;
+			}
+		}
+
+		void DecayWeightsMissingValue(double factor) {
+			if (!neuronMissingValues.IsNull()) {
+				List<Connection> * inputConnections = &(neuronMissingValues->inputs);
+				for (Connection * c = inputConnections->First(); c != NULL; c = inputConnections->Next()) c->weight *= factor;
+			}
+		}
+
+		void CorrectWeigthsInBatchModeMissingValue() {
+			if (!neuronMissingValues.IsNull()) neuronMissingValues->CorrectWeigthsInBatchMode();
+		}
+
+		void DetermineErrorMissingValue() {
+			if (!neuronMissingValues.IsNull()) {
+				if (neuronMissingValues->importance == 0.0) {
+					neuronMissingValues->error = 0.0;
+				} else {
+					neuronMissingValues->DetermineError();
+				}
+			}
+		}
+
+		void CorrectWeigthsMissingValue(double learningRate, double momentum) {
+			if (!neuronMissingValues.IsNull()) {
+				if (neuronMissingValues->importance != 0.0) neuronMissingValues->CorrectWeigths(learningRate, momentum);
+			}
+		}
+
+		void CorrectWeigthsMissingValue(double momentum) {
+			if (!neuronMissingValues.IsNull()) {
+				if (neuronMissingValues->importance != 0.0) neuronMissingValues->CorrectWeigths(momentum);
+			}
+		}
+
+		void UpdateLearningMissingValue() {
+			if (!neuronMissingValues.IsNull()) neuronMissingValues->UpdateLearning();
+		}
+
+		void CorrectLearningMissingValue(double learningCorrectionFactor) {
+			if (!neuronMissingValues.IsNull()) neuronMissingValues->CorrectLearning(learningCorrectionFactor);
+		}
+
+		void RewindMissingValue(bool clearDeltas, bool rewindLearnRates) {
+			if (!neuronMissingValues.IsNull()) neuronMissingValues->Rewind(clearDeltas, rewindLearnRates);
+		}
+
+		void KeepStateMissingValue() {
+			if (!neuronMissingValues.IsNull()) neuronMissingValues->KeepState();
+		}
+
+		bool CanHaveMissingValues() const {
+			return !neuronMissingValues.IsNull();
+		}
+
+		NeuronMissingValues * GetNeuronMissingValues() {
+			return neuronMissingValues;
 		}
 };
 

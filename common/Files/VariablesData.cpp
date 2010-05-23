@@ -234,6 +234,9 @@ void VariablesData::Read(CString filename) {
 	//newMaximum.Resize(columns);
 	data.Resize(rows, columns);
 
+	missingValues.Resize(columns);
+	for(int col = 0; col < columns; col++) missingValues[col] = false;
+
 	// Read data
 	f.Rewind();
 

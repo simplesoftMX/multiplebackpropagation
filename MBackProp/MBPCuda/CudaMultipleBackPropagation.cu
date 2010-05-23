@@ -73,7 +73,7 @@ void CudaMultipleBackPropagation::SelectiveInputLayer::CalculateLocalGradient(cu
 }
 
 void CudaMultipleBackPropagation::SelectiveInputLayer::CorrectWeights(cudaStream_t stream, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, CUDA_FLOATING_TYPE robustFactor, CUDA_FLOATING_TYPE momentum) {
-	KernelCorrectWeightsSelectiveInputs(stream, neurons, patterns, rms, bestRMS, rmsGrowToApplyRobustLearning, inputs, localGradient.Pointer(), weights.Pointer(), bias.Pointer(), learnRate.Pointer(), learnRateBias.Pointer(), lastDeltaWithoutLearningMomentum.Pointer(), lastDeltaWithoutLearningMomentumBias.Pointer(), lastDelta.Pointer(), lastDeltaBias.Pointer(), (CUDA_FLOATING_TYPE) Connection::u, (CUDA_FLOATING_TYPE) Connection::d, robustFactor, momentum, patterns);
+	KernelCorrectWeightsSelectiveInputs(stream, neurons, patterns, rms, bestRMS, rmsGrowToApplyRobustLearning, inputs, localGradient.Pointer(), weights.Pointer(), bias.Pointer(), learnRate.Pointer(), learnRateBias.Pointer(), lastDeltaWithoutLearningMomentum.Pointer(), lastDeltaWithoutLearningMomentumBias.Pointer(), lastDelta.Pointer(), lastDeltaBias.Pointer(), (CUDA_FLOATING_TYPE) Connection::u, (CUDA_FLOATING_TYPE) Connection::d, (CUDA_FLOATING_TYPE) Connection::maxStepSize, robustFactor, momentum, patterns);
 }
 
 int CudaMultipleBackPropagation::DeviceLayer::neuronsWithSelectiveActivation = 0;
@@ -99,7 +99,7 @@ void CudaMultipleBackPropagation::DeviceLayer::CalculateLocalGradient(cudaStream
 }
 
 void CudaMultipleBackPropagation::DeviceLayer::CorrectWeights(cudaStream_t stream, int patternsBlockSize, CUDA_FLOATING_TYPE * rms, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE rmsGrowToApplyRobustLearning, CUDA_FLOATING_TYPE robustFactor, CUDA_FLOATING_TYPE momentum) {
-	KernelCorrectLayerWeights(stream, dimInputsNeurons, patternsBlockSize, rms, bestRMS, rmsGrowToApplyRobustLearning, inputValues, localGradient.Pointer(), weights.Pointer(), learnRate.Pointer(), lastDeltaWithoutLearningMomentum.Pointer(), lastDelta.Pointer(), (CUDA_FLOATING_TYPE) Connection::u, (CUDA_FLOATING_TYPE) Connection::d, robustFactor, momentum, patterns);
+	KernelCorrectLayerWeights(stream, dimInputsNeurons, patternsBlockSize, rms, bestRMS, rmsGrowToApplyRobustLearning, inputValues, localGradient.Pointer(), weights.Pointer(), learnRate.Pointer(), lastDeltaWithoutLearningMomentum.Pointer(), lastDelta.Pointer(), (CUDA_FLOATING_TYPE) Connection::u, (CUDA_FLOATING_TYPE) Connection::d, (CUDA_FLOATING_TYPE) Connection::maxStepSize, robustFactor, momentum, patterns);
 }
 
 void CudaMultipleBackPropagation::CreateDeviceLayers(List<Layer> & hostLayers, List<DeviceLayer> & deviceLayers, int patterns, int * neuronsWithSelectiveActivation, Pointer<CudaMultipleBackPropagation::SelectiveInputLayer> & sil) {

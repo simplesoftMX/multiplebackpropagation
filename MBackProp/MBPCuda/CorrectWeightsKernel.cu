@@ -30,7 +30,7 @@
 #define NEURON blockIdx.y
 #define NUM_NEURONS gridDim.y
 
-template <int blockSize> KERNEL CorrectLayerWeights(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * learningRate, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentum, CUDA_FLOATING_TYPE * lastDelta, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE momentum, int numberPatterns) {
+template <int blockSize> KERNEL CorrectLayerWeights(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * learningRate, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentum, CUDA_FLOATING_TYPE * lastDelta, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE maxStepSize, CUDA_FLOATING_TYPE momentum, int numberPatterns) {
     extern __shared__ CUDA_FLOATING_TYPE deltas[];
     
     if (bestRMS != NULL) {
@@ -82,7 +82,7 @@ template <int blockSize> KERNEL CorrectLayerWeights(CUDA_FLOATING_TYPE * rmsF, C
 
             CUDA_FLOATING_TYPE factor = SAME_DIRECTION(lastDeltaWithoutLearningMomentum[connection], delta) ? u : d;
             learnRate *= factor;
-            if (learnRate > MAX_STEP_SIZE) learnRate = MAX_STEP_SIZE;
+            if (learnRate > maxStepSize) learnRate = maxStepSize;
             learningRate[connection] = learnRate;
             
             lastDeltaWithoutLearningMomentum[connection] = delta;
@@ -105,9 +105,9 @@ template <int blockSize> KERNEL CorrectLayerWeights(CUDA_FLOATING_TYPE * rmsF, C
 	}
 }
 
-#define CORRECT_LAYER_WEIGHTS(X) CorrectLayerWeights<X><<<gridSize, blockSize, blockSize * sizeof(CUDA_FLOATING_TYPE), stream>>>(rmsF, bestRMS, maxErrorGrowth, inputs, localGradient, weights, learningRate, lastDeltaWithoutLearningMomentum, lastDelta, u, d, r, momentum, numberPatterns);
+#define CORRECT_LAYER_WEIGHTS(X) CorrectLayerWeights<X><<<gridSize, blockSize, blockSize * sizeof(CUDA_FLOATING_TYPE), stream>>>(rmsF, bestRMS, maxErrorGrowth, inputs, localGradient, weights, learningRate, lastDeltaWithoutLearningMomentum, lastDelta, u, d, r, maxStepSize, momentum, numberPatterns);
 
-void KernelCorrectLayerWeights(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * learningRate, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentum, CUDA_FLOATING_TYPE * lastDelta, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE momentum, int numberPatterns) {
+void KernelCorrectLayerWeights(cudaStream_t stream, dim3 & gridSize, int blockSize, CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * weights, CUDA_FLOATING_TYPE * learningRate, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentum, CUDA_FLOATING_TYPE * lastDelta, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE maxStepSize, CUDA_FLOATING_TYPE momentum, int numberPatterns) {
     switch(blockSize) {
         case 512:
             CORRECT_LAYER_WEIGHTS(512);

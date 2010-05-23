@@ -23,7 +23,7 @@
 #define NEURON blockIdx.x
 #define NUM_NEURONS gridDim.x
 
-template <int blockSize> KERNEL CorrectWeightsSelectiveInputs(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * selectiveNeuronsWeights, CUDA_FLOATING_TYPE * selectiveNeuronsBias, CUDA_FLOATING_TYPE * learningRateWeights, CUDA_FLOATING_TYPE * learningRateBias, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentumWeights, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentumBias, CUDA_FLOATING_TYPE * lastDeltaWeights, CUDA_FLOATING_TYPE * lastDeltaBias, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE momentum, int numberPatterns) {
+template <int blockSize> KERNEL CorrectWeightsSelectiveInputs(CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * selectiveNeuronsWeights, CUDA_FLOATING_TYPE * selectiveNeuronsBias, CUDA_FLOATING_TYPE * learningRateWeights, CUDA_FLOATING_TYPE * learningRateBias, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentumWeights, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentumBias, CUDA_FLOATING_TYPE * lastDeltaWeights, CUDA_FLOATING_TYPE * lastDeltaBias, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE maxStepSize, CUDA_FLOATING_TYPE momentum, int numberPatterns) {
     extern __shared__ CUDA_FLOATING_TYPE deltasWeights[];
 	CUDA_FLOATING_TYPE * deltasBias = (deltasWeights + blockDim.x);
     
@@ -112,8 +112,8 @@ template <int blockSize> KERNEL CorrectWeightsSelectiveInputs(CUDA_FLOATING_TYPE
 			learnRateB *= factorB;
 			learnRateW *= factorW;
 
-			if (learnRateB > MAX_STEP_SIZE) learnRateB = MAX_STEP_SIZE;
-			if (learnRateW > MAX_STEP_SIZE) learnRateW = MAX_STEP_SIZE;
+			if (learnRateB > maxStepSize) learnRateB = maxStepSize;
+			if (learnRateW > maxStepSize) learnRateW = maxStepSize;
 
 			learningRateBias[NEURON] = learnRateB;
 			learningRateWeights[NEURON] = learnRateW;
@@ -155,9 +155,9 @@ template <int blockSize> KERNEL CorrectWeightsSelectiveInputs(CUDA_FLOATING_TYPE
 	}
 }
 
-#define CORRECT_WEIGHTS(X) CorrectWeightsSelectiveInputs<X><<<neurons, 2 * patterns * sizeof(CUDA_FLOATING_TYPE), stream>>>(rmsF, bestRMS, maxErrorGrowth, inputs, localGradient, selectiveNeuronsWeights, selectiveNeuronsBias, learningRateWeights, learningRateBias, lastDeltaWithoutLearningMomentumWeights, lastDeltaWithoutLearningMomentumBias, lastDeltaWeights, lastDeltaBias, u, d, r, momentum, numberPatterns);
+#define CORRECT_WEIGHTS(X) CorrectWeightsSelectiveInputs<X><<<neurons, 2 * patterns * sizeof(CUDA_FLOATING_TYPE), stream>>>(rmsF, bestRMS, maxErrorGrowth, inputs, localGradient, selectiveNeuronsWeights, selectiveNeuronsBias, learningRateWeights, learningRateBias, lastDeltaWithoutLearningMomentumWeights, lastDeltaWithoutLearningMomentumBias, lastDeltaWeights, lastDeltaBias, u, d, r, maxStepSize, momentum, numberPatterns);
 
-void KernelCorrectWeightsSelectiveInputs(cudaStream_t stream, int neurons, int patterns, CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * selectiveNeuronsWeights, CUDA_FLOATING_TYPE * selectiveNeuronsBias, CUDA_FLOATING_TYPE * learningRateWeights, CUDA_FLOATING_TYPE * learningRateBias, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentumWeights, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentumBias, CUDA_FLOATING_TYPE * lastDeltaWeights, CUDA_FLOATING_TYPE * lastDeltaBias, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE momentum, int numberPatterns) {
+void KernelCorrectWeightsSelectiveInputs(cudaStream_t stream, int neurons, int patterns, CUDA_FLOATING_TYPE * rmsF, CUDA_FLOATING_TYPE * bestRMS, CUDA_FLOATING_TYPE maxErrorGrowth, CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * localGradient, CUDA_FLOATING_TYPE * selectiveNeuronsWeights, CUDA_FLOATING_TYPE * selectiveNeuronsBias, CUDA_FLOATING_TYPE * learningRateWeights, CUDA_FLOATING_TYPE * learningRateBias, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentumWeights, CUDA_FLOATING_TYPE * lastDeltaWithoutLearningMomentumBias, CUDA_FLOATING_TYPE * lastDeltaWeights, CUDA_FLOATING_TYPE * lastDeltaBias, CUDA_FLOATING_TYPE u, CUDA_FLOATING_TYPE d, CUDA_FLOATING_TYPE r, CUDA_FLOATING_TYPE maxStepSize, CUDA_FLOATING_TYPE momentum, int numberPatterns) {
     switch(patterns) {
         case 512:
             CORRECT_WEIGHTS(512);

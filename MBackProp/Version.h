@@ -20,6 +20,6 @@
 
 // Comments: For Visual Studio 2008 an empty line is needed at the end of this file
 #ifndef MBP_VERSION
-	#define MBP_VERSION "Multiple Back-Propagation Version 2.2.1"
-	#define MBP_VERSION_BUILD "2.2.1.1"
+	#define MBP_VERSION "Multiple Back-Propagation Version 2.2.2"
+	#define MBP_VERSION_BUILD "2.2.2.1"
 #endif

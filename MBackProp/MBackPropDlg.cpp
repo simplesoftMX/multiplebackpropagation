@@ -2384,7 +2384,7 @@ bool CMBackPropDlg::SaveNetwork(CString & filename) {
 		s.Format(_TEXT("%ld\n"), programPriority);
 		f.WriteString(s);
 		f.WriteLine((updateScreen)   ? "1" : "0");
-		
+
 		f.WriteLine((deltaBarDelta) ? "1" : "0");
 		s.Format(_TEXT("%1.15f\n%1.15f\n%1.15f\n"), Connection::u, Connection::d, Connection::maxStepSize);
 		f.WriteString(s);
@@ -2414,7 +2414,7 @@ bool CMBackPropDlg::SaveNetwork(CString & filename) {
 
 		s.Format(_TEXT("%1.15f\n%1.15f\n%1.15f\n%1.15f\n"), percentIncDecLearnRate, percentIncDecMomentum, percentIncDecSpaceLearnRate, percentIncDecSpaceMomentum);
 		f.WriteString(s);
-		
+
 		s.Format(_TEXT("%1.15f\n%ld\n%ld\n"), mainNetLearningMomentumInformation.learningRate.value, mainNetLearningMomentumInformation.learningRate.decayEpochs, mainNetLearningMomentumInformation.learningRate.decayPercentage);
 		f.WriteString(s);
 
@@ -2676,6 +2676,12 @@ bool CMBackPropDlg::LoadNetwork(CString & filename) {
 			MBPTopologyCtrl->SetConnectInputLayerWithOutputLayer(TRUE, FALSE);
 			MBPTopologyCtrl->SetConnectInputLayerWithOutputLayer(FALSE, FALSE);
 		}
+
+		int pathSeparator = filename.ReverseFind('\\');
+		if (filename.ReverseFind('/') > pathSeparator) pathSeparator = filename.ReverseFind('/');
+		if (pathSeparator == -1) pathSeparator = filename.Find(':');
+
+		path = filename.Left(pathSeparator + 1);
 
 		LoadTrainingData(false);
 		if (!CreateNetwork()) return false;

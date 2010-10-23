@@ -138,7 +138,7 @@ template <int blockSize> KERNEL CorrectWeightsSelectiveInputs(CUDA_FLOATING_TYPE
 					learningRateBias[NEURON] = learnRateB;
 				}
             } else {
-                selectiveNeuronsBias[NEURON] = w;
+                selectiveNeuronsBias[NEURON] = wb;
             }
 
             if (isnan(w) || isinf(w)) {

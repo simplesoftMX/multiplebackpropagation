@@ -37,7 +37,7 @@ KERNEL FireSelectiveInputs(CUDA_FLOATING_TYPE * inputs, CUDA_FLOATING_TYPE * wei
 		CUDA_FLOATING_TYPE w = weights[NEURON];
 		CUDA_FLOATING_TYPE b = bias[NEURON];
 
-		if (w != CUDA_VALUE(0.0) || b != CUDA_VALUE(0.0)) o = CUDA_TANH(o * w + b); // input may have missing values		
+		if (w != CUDA_VALUE(0.0) || b != CUDA_VALUE(0.0)) o = CUDA_TANH(o * w + b); // input may have missing values
 	}
 
 	outputs[idx] = o;

@@ -345,6 +345,7 @@ CudaMultipleBackPropagation::CudaMultipleBackPropagation(Pointer <MultipleBackPr
 
 	cudaMallocHost((void**) &rms, sizeof(CUDA_FLOATING_TYPE));
 	*rms = CUDA_VALUE(1.0);
+	cudaMemcpy(d_rmsOut.Pointer(), rms, sizeof(CUDA_FLOATING_TYPE), cudaMemcpyHostToDevice);
 
     /*******
     Other stuff and streams

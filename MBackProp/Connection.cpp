@@ -1,21 +1,21 @@
 /*
 	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
+	Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
-    Multiple Back-Propagation is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Multiple Back-Propagation is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
@@ -29,25 +29,27 @@
 
 #include "stdafx.h"
 #include "Connection.h"
+#include "../Common/Files/OutputFile.h"
+#include "../Common/Files/InputFile.h"
 
 /**
  Attribute : static double minInitialWeight
  Purpose   : Contains the minimum value for 
-             a Connection inital (random) weight.
+			 a Connection inital (random) weight.
 */
 double Connection::minInitialWeight = -1.0;
 
 /**
  Attribute : static double minInitialWeight
  Purpose   : Contains the maximum value for 
-             a Connection inital (random) weight.
+			 a Connection inital (random) weight.
 */
 double Connection::maxInitialWeight = 1.0;
 
 /**
  Attribute : static double u
  Purpose   : Contains the increase (up) value 
-             for the learning rate of a connection.
+			 for the learning rate of a connection.
  Comments  : Used by the Delta-Bar-Delta.
 */
 double Connection::u = 1.1;
@@ -55,7 +57,7 @@ double Connection::u = 1.1;
 /**
  Attribute : static double d
  Purpose   : Contains the decrease (down) value 
-             for the learning rate of a connection.
+			 for the learning rate of a connection.
  Comments  : Used by the Delta-Bar-Delta.
 */
 double Connection::d = 0.9;
@@ -81,3 +83,25 @@ bool Connection::Load(InputFile & f, bool loadAditionalVars) {
 
 	return true;
 }
+
+void Connection::Save(OutputFile & f, char * separator, bool saveAditionalVars) {
+	CString s;
+
+	s.Format(L"%1.15f", weight);
+	f.WriteString(s);
+
+	if (saveAditionalVars) {
+		f.WriteString(CA2T(separator));
+		s.Format(L"%1.15f", delta);
+		f.WriteString(s);
+
+		f.WriteString(separator);
+		s.Format(L"%1.15f", deltaWithoutLearningMomentum);
+		f.WriteString(s);
+
+		f.WriteString(separator);
+		s.Format(L"%1.15f", learningRate);
+		f.WriteString(s);
+	}
+}
+

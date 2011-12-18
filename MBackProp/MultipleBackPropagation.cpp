@@ -1,26 +1,88 @@
 /*
 	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
+	Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
-    Multiple Back-Propagation is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Multiple Back-Propagation is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
 #include "MultipleBackPropagation.h"
 #include "MBackProp.h"
+#include "../Common/Files/OutputFile.h"
+#include "../Common/Files/VariablesData.h"
+
+/**
+	Method   : void WriteActivationFunctionCCode(OutputFile & f, NeuronWithInputConnections * n, const char * outputNeuronVariable)
+	Purpose  : Write C code for the activation function of a given neuron.
+	Version  : 1.0.1
+*/
+void MultipleBackPropagation::WriteActivationFunctionCCode(OutputFile & f, NeuronWithInputConnections * n, const char * outputNeuronVariable) {
+	CString s;
+
+	ActivationFunction * a = (ActivationFunction *) (n->function);
+
+	if (a->Alpha() == 1 && a->id == Linear) return;
+
+	f.WriteString("\t");
+	f.WriteString(outputNeuronVariable);
+
+	switch (a->id) {
+		case Sigmoid :
+			f.WriteString(" = 1.0 / (1.0 + exp(");
+			if (a->Alpha() == 1.0) {
+				f.WriteString("-");
+			} else {
+				s.Format(_TEXT("%1.15f"), -a->Alpha());
+				f.WriteString(s);
+				f.WriteString(" * ");
+			}
+			f.WriteString(outputNeuronVariable);
+			f.WriteLine("));");
+			break;
+		case Tanh :
+			f.WriteString(" = tanh(");
+			if (a->Alpha() != 1.0) {
+				s.Format(_TEXT("%1.15f"), a->Alpha());
+				f.WriteString(s);
+				f.WriteString(" * ");
+			}
+			f.WriteString(outputNeuronVariable);
+			f.WriteLine(");");
+			break;
+		case Gaussian :
+			f.WriteString(" = exp(-(");
+			f.WriteString(outputNeuronVariable);
+			f.WriteString(" * ");
+			f.WriteString(outputNeuronVariable);
+			f.WriteString(")");
+			if (a->Alpha() != 1.0) {
+				f.WriteString(" / ");
+				s.Format(_TEXT("%1.15f"), a->Alpha());
+				f.WriteString(s);
+			}
+			f.WriteLine(");");
+			break;
+		default : // linear	
+			if (a->Alpha() != 1.0) {
+				s.Format(_TEXT(" *= %1.15f"), a->Alpha());
+				f.WriteString(s);
+				f.WriteLine(";");
+			}
+	}
+}
 
 // Write C code for corresponding to the feed forward network into a given file.
 void MultipleBackPropagation::GenerateCCode(OutputFile & f, VariablesData & trainVariables, BOOL inputLayerIsConnectedWithOutputLayer, BOOL spaceInputLayerIsConnectedWithOutputLayer) {
@@ -183,7 +245,7 @@ void MultipleBackPropagation::GenerateCCode(OutputFile & f, VariablesData & trai
 				f.WriteLine(aux + L" += *sw++ * " + ((hasMissingValues) ? "spaceI" : "i") + "nputs[c];");
 			}
 
-			WriteActivationFunctionCCode(f, n, aux);
+			WriteActivationFunctionCCode(f, n, CT2CA(aux));
 
 			nn++;
 		}
@@ -230,7 +292,7 @@ void MultipleBackPropagation::GenerateCCode(OutputFile & f, VariablesData & trai
 				f.WriteLine(aux + _TEXT(" += *mw++ * inputs[c];"));
 			}
 
-			WriteActivationFunctionCCode(f, n, aux);
+			WriteActivationFunctionCCode(f, n, CT2CA(aux));
 
 			if (!spaceNetwork.IsNull() && nn < neuronsWithSelectiveActivation[l]) {
 				f.WriteString("\t");

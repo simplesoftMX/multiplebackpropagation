@@ -1,27 +1,27 @@
 /*
 	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
+	Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
-    Multiple Back-Propagation is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Multiple Back-Propagation is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
  Class    : BackPropagation
  Puropse  : Represents a Feed-Forward network, that can be
-            trained with the Back-Propagation Algorithm.
+			trained with the Back-Propagation Algorithm.
  Date     : 22 of June of 1999
  Reviewed : 9 of May of 2000
  Version  : 1.5.0 
@@ -29,17 +29,20 @@
 #ifndef BackPropagation_h
 #define BackPropagation_h
 
+#include <Windows.h>
+
 #include "cuda.h"
 
 #include "../MBPCommon.h"
 #include "../Common/Pointers/Matrix.h"
-#include "../Common/Files/InputFile.h"
-#include "../Common/Files/OutputFile.h"
 #include "AditionalDefinitions.h"
 #include "Layer.h"
 
+class OutputFile;
+class InputFile;
+
 #ifdef MBP_WITH_CUDA
-    #include "../Common/CUDA/Arrays/HostArray.h"
+	#include "../Common/CUDA/Arrays/HostArray.h"
 #endif
 
 class BackPropagation {
@@ -80,42 +83,42 @@ class BackPropagation {
 		/**
 		 Attribute : bool batchTraining
 		 Purpose   : Indicates if the training should be 
-		             maked in batch or online mode.
+					 maked in batch or online mode.
 		*/
 		bool batchTraining;
 
 		/**
 		 Attribute : double weightDecayFactor
 		 Purpose   : Indicates if the training should be 
-		             maked in batch or online mode.
+					 maked in batch or online mode.
 		*/
 		double weightDecayFactor;
 
 		/**
 		 Attribute : bool deltaBarDelta
 		 Purpose   : indicates if we are using the Delta-Bar-Delta 
-		             algorithm to train the network.
+					 algorithm to train the network.
 		*/
 		bool deltaBarDelta;
 
 		/**
 		 Attribute : bool randomPatternPresentation
 		 Purpose   : Indicates if the patterns should 
-		             be presented in a random order.
+					 be presented in a random order.
 		*/
 		bool randomPatternPresentation;
 
 		/**
 		 Attribute : array<int> patternOrder
 		 Purpose   : Defines the oreder of presentation of the patterns 
-		             when randomPatternPresentation is true.
+					 when randomPatternPresentation is true.
 		*/
 		Array<int> patternOrder;
 
 		/**
 		 Constructor : BackPropagation()
 		 Purpose     : Create a Feed-Forward network, that can be 
-		               trained with the Back-Propagation Algorithm.
+					   trained with the Back-Propagation Algorithm.
 		 Version     : 1.0.0
 		*/
 		BackPropagation() {}
@@ -123,7 +126,7 @@ class BackPropagation {
 		/**
 		 Method  : void CompleteBatchCorrection(int numberPatterns)
 		 Purpose : Completes the weight correction when the
-		           batch mode is used.
+				   batch mode is used.
 		 Version : 1.0.0
 		*/
 		virtual void CompleteBatchCorrection(int numberPatterns) {
@@ -169,7 +172,7 @@ class BackPropagation {
 		/**
 		 Method  : void SetRandomPatternPresentation(bool value)
 		 Purpose : Sets whether the patterns should 
-		           be presented in a random order or not.
+				   be presented in a random order or not.
 		 Version : 1.0.0
 		*/
 		void SetRandomPatternPresentation(bool value) {
@@ -242,7 +245,7 @@ class BackPropagation {
 		/**
 		 Constructor : BackPropagation(Array<int> & layersSize, List< Array<activation_function> > & activationFunction, List< Array<double> > & activationFunctionParameter)
 		 Purpose     : Create a Feed-Forward network, that can be 
-		               trained with the Back-Propagation Algorithm.
+					   trained with the Back-Propagation Algorithm.
 		 Version     : 1.4.0
 		*/
 		BackPropagation(Array<int> & layersSize, List< Array<activation_function> > & activationFunction, List< Array<double> > & activationFunctionParameter, BOOL connectInputLayerToOutputLayer, Array<bool> & inputMissingValues) {
@@ -258,7 +261,7 @@ class BackPropagation {
 
 			// Add the Hidden Layers
 			int numberHiddenLayers = numberLayers - 2;
-            int l;
+			int l;
 			for (l=1; l<=numberHiddenLayers; l++) {
 				prevLayer = static_cast<Layer *>(new HiddenLayer(*(activationFunction.Element(l)), *(activationFunctionParameter.Element(l)), prevLayer));
 				layers.Add(prevLayer);
@@ -278,7 +281,7 @@ class BackPropagation {
 		/**
 		 Method  : void Fire(Array<double> & input)
 		 Purpose : This method makes the network progate its inputs in order to 
-		           obtain the network outputs.
+				   obtain the network outputs.
 		 Version : 1.0.1
 		*/
 		virtual void Fire(Array<double> & input) {
@@ -327,7 +330,7 @@ class BackPropagation {
 		/**
 		 Method  : void Fire(Array<double> & input)
 		 Purpose : This method makes the network propagate its inputs 
-		           and colects its outputs to the array output.
+				   and colects its outputs to the array output.
 		 Version : 1.0.0
 		*/
 		void GetNetworkOutputs(Array<double> & input, Array<double> & output) {
@@ -344,7 +347,7 @@ class BackPropagation {
 		/**
 		 Method   : virtual void CorrectWeights(Array<double> & desiredOutput)
 		 Purpose  : This method corrects the network wheights in order to minimize 
-		            the error between the network output and the desired output.
+					the error between the network output and the desired output.
 		 Version  : 1.0.1
 		 Comments : output layer error - See equations 1.14 and 2.4
 								hidden layer error - See equations 1.18 and 2.5
@@ -632,46 +635,7 @@ class BackPropagation {
 		 Purpose  : Save the network weights to a given file. 
 		 Version  : 1.0.0
 		*/
-		void SaveWeights(OutputFile & f, char * separator = "\n", bool saveAditionalVars = false) {
-			InputLayer * inputLayer = static_cast<InputLayer *> (layers.First());
-			if (inputLayer->CanHaveMissingValues()) {
-				List<Neuron> * inputNeurons = &(inputLayer->neurons);
-
-				for (InputNeuron * n = static_cast<InputNeuron *>(inputNeurons->First()); n != NULL; n = static_cast<InputNeuron *>(inputNeurons->Next())) {
-					if (n->CanHaveMissingValues()) {
-						List<Connection> * inputConnections = &(n->GetNeuronMissingValues()->inputs);
-						Connection * c = inputConnections->First();
-						while(c != NULL) {
-							c->Save(f, separator, saveAditionalVars);
-
-							c = inputConnections->Next();
-							if (c != NULL || strcmp(separator, "\n") == 0) f.WriteString(separator);
-						}
-					}
-				}
-			}
-
-			int numberLayers = layers.Lenght();
-
-			for (int l = 1; l < numberLayers; l++) {
-				List<Neuron> * layerNeurons = &(layers.Element(l)->neurons);
-
-				int numberNeurons = layerNeurons->Lenght();
-
-				for (int n = 0; n < numberNeurons; n++) {
-					NeuronWithInputConnections * neuron = dynamic_cast<NeuronWithInputConnections *>(layerNeurons->Element(n));
-
-					List<Connection> * inputConnections = &(neuron->inputs);
-					Connection * c = inputConnections->First();
-					while(c != NULL) {
-						c->Save(f, separator, saveAditionalVars);
-
-						c = inputConnections->Next();
-						if (c != NULL || l < numberLayers - 1 || n < numberNeurons - 1 || strcmp(separator, "\n") == 0) f.WriteString(separator);
-					}
-				}				
-			}
-		}
+		void SaveWeights(OutputFile & f, char * separator = "\n", bool saveAditionalVars = false);
 
 		void Weights(int layer, int neuron, Array<double> & weights) {
 			NeuronWithInputConnections * n = dynamic_cast<NeuronWithInputConnections *>(layers.Element(layer)->neurons.Element(neuron));

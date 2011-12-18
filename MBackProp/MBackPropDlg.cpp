@@ -1,21 +1,21 @@
 /*
 	Noel Lopes is an Assistant Professor at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
+	Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
-    Multiple Back-Propagation is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Multiple Back-Propagation is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
@@ -25,21 +25,21 @@
  Reviewed : 14 of March of 2009.
  Version  : 1.8.0
  Comments :
-             ---------
-            | CObject |
-             --------- 
-                |   ------------
-                -->| CCmdTarget |
-                    ------------
-                      |   ------
-                      -->| CWnd |
-                          ------
-                            |   ---------
-                            -->| CDialog |
-                                ---------
-                                  |   --------------
-                                  -->| CMBackPropDlg |
-                                      --------------
+			 ---------
+			| CObject |
+			 --------- 
+				|   ------------
+				-->| CCmdTarget |
+					------------
+					  |   ------
+					  -->| CWnd |
+						  ------
+							|   ---------
+							-->| CDialog |
+								---------
+								  |   --------------
+								  -->| CMBackPropDlg |
+									  --------------
 */
 #include "stdafx.h"
 #include "MBackProp.h"
@@ -55,6 +55,7 @@
 #include "SensitivityDialog.h"
 #include "GenerateCCodeDialog.h"
 #include "AditionalDefinitions.h"
+#include "../Common/Files/OutputFile.h"
 
 #include <io.h>
 #include <fcntl.h>
@@ -88,7 +89,7 @@
 /**
  Attribute : static char * unrecognizedFormat
  Purpose   : Contains a string specifying that 
-	           the file format is not recognized.
+			   the file format is not recognized.
  Comments  : static attributte.
 */
 const char * CMBackPropDlg::unrecognizedFormat = "Can not recognize the file format.";
@@ -96,7 +97,7 @@ const char * CMBackPropDlg::unrecognizedFormat = "Can not recognize the file for
 /**
  Attribute : static const int maxPointsRMS
  Purpose   : Contains the maximum number of 
-             points used to draw the graphics.
+			 points used to draw the graphics.
  Comments  : static attributte.
 */
 const int CMBackPropDlg::maxPointsRMS = 512;
@@ -374,7 +375,7 @@ void CMBackPropDlg::OnPaint() {
 /**
  Method  : HCURSOR CMBackPropDlg::OnQueryDragIcon()
  Purpose : The system calls this to obtain the cursor to 
-           display while the user drags the minimized window.
+		   display while the user drags the minimized window.
  Version : 1.0.0
 */
 HCURSOR CMBackPropDlg::OnQueryDragIcon() {
@@ -546,7 +547,7 @@ void CMBackPropDlg::TrainOneEpoch() {
 	bool changeLearningOrMomentum = ((++epoch % 300) == 0 && (autoUpdateMomentum || autoUpdateLearning));
 	if (changeLearningOrMomentum || robustLearning) mbp->KeepState();    
 
-    mbp->Train(trainInputPatterns, trainDesiredOutputPatterns);
+	mbp->Train(trainInputPatterns, trainDesiredOutputPatterns);
 
 	epochTrainingTime += clock() - initialTime;
 
@@ -554,7 +555,7 @@ void CMBackPropDlg::TrainOneEpoch() {
 	initialTime = clock();
 	
 	if (robustLearning) {
-        int t;
+		int t;
 		for (t = 0; rms > last_rms * rmsGrowToApplyRobustLearning && t < 3; t++) {
 			mbp->ReTrain(trainInputPatterns, trainDesiredOutputPatterns, robustFactor, true);
 			if (updateScreen) editMainLearning.SetValue(mbp->GetLearningRate());
@@ -854,10 +855,10 @@ void CMBackPropDlg::TrainOneEpoch() {
 /**
  Method   : bool CMBackPropDlg::TopologyIsValid()
  Purpose  : Returns true if the network topology 
-            is valid and false otherwise.
+			is valid and false otherwise.
  Version  : 1.1.0
  Comments : If the topology is invalid the user is informed 
-            and the focus is set to the BPTopology control.
+			and the focus is set to the BPTopology control.
 */
 bool CMBackPropDlg::TopologyIsValid() {
 	if (MBPTopologyCtrl->GetLayers(true) < 2) {
@@ -873,7 +874,7 @@ bool CMBackPropDlg::TopologyIsValid() {
 /**
  Method   : bool CMBackPropDlg::CreateNetwork()
  Purpose  : Create the network. Returns true if 
-            sucessfull otherwise returns false.
+			sucessfull otherwise returns false.
  Version  : 1.2.1
  Comments : The network will only be created if it does not exist.
 */
@@ -1461,7 +1462,7 @@ void CMBackPropDlg::SelectTopologyTab() {
 /**
  Method   : void CMBackPropDlg::OnSelchangeTab(NMHDR * pNMHDR, LRESULT * pResult)
  Purpose  : Show and hide the appropriate controls according 
-            to the tab selected. Set the focus to one of the 
+			to the tab selected. Set the focus to one of the 
 						shown controls if they can receive focus.
  Version  : 1.1.0
 */
@@ -1534,7 +1535,7 @@ void CMBackPropDlg::OnSelchangeTab(NMHDR * pNMHDR, LRESULT * pResult) {
 /**
  Method   : void CMBackPropDlg::OnClose()
  Purpose  : Make sure the training thread stops 
-            execution before closing the application.
+			execution before closing the application.
  Version  : 1.0.0
 */
 void CMBackPropDlg::OnClose() {
@@ -1549,7 +1550,7 @@ void CMBackPropDlg::OnClose() {
 /**
  Method   : void CMBackPropDlg::OnSize(UINT nType, int cx, int cy)
  Purpose  : Resize all the windows inside the dialog,
-            each time the dialog is sized.
+			each time the dialog is sized.
  Version  : 1.0.0
 */
 void CMBackPropDlg::OnSize(UINT nType, int cx, int cy) {
@@ -1895,7 +1896,7 @@ void CMBackPropDlg::OnSize(UINT nType, int cx, int cy) {
 /**
  Method  : void CMBackPropDlg::UpdateLearningMomentum()
  Purpose : Update the values of the learning rate and 
-		       momentum for the main and the space network.
+			   momentum for the main and the space network.
  Version : 1.1.0
 */
 void CMBackPropDlg::UpdateLearningMomentum() {
@@ -1976,9 +1977,9 @@ void CMBackPropDlg::OnChangeTrainFileBox() {
 /**
  Method   : void CMBackPropDlg::OnRandomizeWeights()
  Purpose  : Randomize the network weights between two 
-            values determined by the user. 
+			values determined by the user. 
  Comments : This is done only if the topology is valid.
-            Called when the user clicks the randomize weights button.
+			Called when the user clicks the randomize weights button.
 */
 void CMBackPropDlg::OnRandomizeWeights() {
 	LoadTrainingTestDataIfPossible();
@@ -2054,7 +2055,7 @@ void CMBackPropDlg::OnLoadNetwork() {
  Called when the user clicks the save network button
 */
 void CMBackPropDlg::OnSaveNetwork() {
- 	LoadTrainingTestDataIfPossible();
+	LoadTrainingTestDataIfPossible();
 	if (mbp.IsNull()) return;
 
 	SaveNetworkDialog dialog(this);
@@ -2148,7 +2149,7 @@ void CMBackPropDlg::FillComboOutput(VariablesData & varsData) {
  Purpose  : Returns the train root mean square error.
  Version  : 1.1.0
  Comments : The method also displays the rms value and invalidates 
-            the training output vs desired graphic.
+			the training output vs desired graphic.
 */
 void CMBackPropDlg::TrainRMS(double & rms, double & spaceRMS, bool display) {
 	CString s;
@@ -2172,7 +2173,7 @@ void CMBackPropDlg::TrainRMS(double & rms, double & spaceRMS, bool display) {
  Purpose  : Returns the test root mean square error.
  Version  : 1.0.0
  Comments : The method also displays the rms value and invalidates 
-            the testing output vs desired graphic.
+			the testing output vs desired graphic.
 */
 void CMBackPropDlg::TestRMS(double & rms, double & spaceRMS, bool display) {
 	CString s;
@@ -2194,7 +2195,7 @@ void CMBackPropDlg::TestRMS(double & rms, double & spaceRMS, bool display) {
 /**
  Method   : void CMBackPropDlg::OutputChanged(int newOutput)
  Purpose  : Called each time the output variable that the 
-            user is seeing changes. At this point graphics 
+			user is seeing changes. At this point graphics 
 						must change in order to reflect the changes.
  Version  : 1.0.0
 */
@@ -2246,7 +2247,7 @@ void CMBackPropDlg::StopTraining() {
 /**
  Method   : bool CMBackPropDlg::GenerateCCode(CString & filename)
  Purpose  : Generate C code for the network and 
-            save it into the given filename.
+			save it into the given filename.
  Version  : 1.0.0
 */
 bool CMBackPropDlg::GenerateCCode(CString & filename) {
@@ -2263,7 +2264,7 @@ bool CMBackPropDlg::GenerateCCode(CString & filename) {
 /**
  Method   : bool CMBackPropDlg::SaveWeights(CString & filename)
  Purpose  : Save the network weights. Returns 
-            true if succefull, false otherwise. 
+			true if succefull, false otherwise. 
  Version  : 1.0.0
 */
 bool CMBackPropDlg::SaveWeights(CString & filename) {
@@ -2313,7 +2314,7 @@ bool CMBackPropDlg::SaveWeights(CString & filename) {
 /**
  Method   : bool CMBackPropDlg::LoadWeights(CString & filename)
  Purpose  : Load the network weights. Returns 
-            true if succefull, false otherwise. 
+			true if succefull, false otherwise. 
  Version  : 1.0.0
 */
 bool CMBackPropDlg::LoadWeights(CString & filename) {

@@ -1,21 +1,21 @@
 /*
 	Noel Lopes is a Professor Assistant at the Polytechnic Institute of Guarda, Portugal (for more information see readme.txt)
-    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Noel de Jesus Mendonça Lopes
+	Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Noel de Jesus Mendonça Lopes
 
 	This file is part of Multiple Back-Propagation.
 
-    Multiple Back-Propagation is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Multiple Back-Propagation is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
@@ -31,8 +31,9 @@
 #include <stdlib.h>
 
 #include "AditionalDefinitions.h"
-#include "../Common/Files/OutputFile.h"
-#include "../Common/Files/InputFile.h"
+
+class OutputFile;
+class InputFile;
 
 class Connection {
 	private :
@@ -97,21 +98,21 @@ class Connection {
 		/**
 		 Attribute : static double minInitialWeight
 		 Purpose   : Contains the minimum value for 
-		             a Connection inital (random) weight.
+					 a Connection inital (random) weight.
 		*/
 		static double minInitialWeight;
 
 		/**
 		 Attribute : static double minInitialWeight
 		 Purpose   : Contains the maximum value for 
-		             a Connection inital (random) weight.
+					 a Connection inital (random) weight.
 		*/
 		static double maxInitialWeight;
 
 		/**
 		 Attribute : static double u
 		 Purpose   : Contains the increase (up) value 
-		             for the learning rate of a connection.
+					 for the learning rate of a connection.
 		 Comments  : Used by the Delta-Bar-Delta.
 		*/
 		static double u;
@@ -119,7 +120,7 @@ class Connection {
 		/**
 		 Attribute : static double d
 		 Purpose   : Contains the decrease (down) value 
-		             for the learning rate of a connection.
+					 for the learning rate of a connection.
 		 Comments  : Used by the Delta-Bar-Delta.
 		*/
 		static double d;
@@ -129,7 +130,7 @@ class Connection {
 		/**
 		 Attribute : double input
 		 Purpose   : keeps the input of the connection, 
-		             wich is send by the output neuron.
+					 wich is send by the output neuron.
 		*/
 		double input;
 
@@ -142,30 +143,30 @@ class Connection {
 		/**
 		 Attribute : double error
 		 Purpose   : keeps the error caused by the weight associated 
-		             with this connection, for a given pattern.
+					 with this connection, for a given pattern.
 		*/
 		double error;
 
 		/**
 		 Attribute : double delta
 		 Purpose   : Contains the value of the last update 
-		             in the connection weight.
+					 in the connection weight.
 		*/
 		double delta;
 
 		/**
 		 Attribute : double newDelta
 		 Purpose   : Contains the value of the update in the 
-		             connection weight for the current epoch.
+					 connection weight for the current epoch.
 		 Comments  : Used in batch update mode. Also used in 
-		             the auto update of learning and momentum.
+					 the auto update of learning and momentum.
 		*/
 		double newDelta;
 
 		/**
 		 Attribute : double deltaWithoutLearningMomentum
 		 Purpose   : Contains the value of delta without
-		             the learning and momentum components.
+					 the learning and momentum components.
 		 Comments  : Used in the Delta-Bar-Delta.
 		*/
 		double deltaWithoutLearningMomentum, lastDeltaWithoutLearningMomentum;
@@ -239,11 +240,11 @@ class Connection {
 		/**
 		 Constructor : Connection()
 		 Purpose     : Initialize the connection weight to a random value 
-		               between minInitialWeight and maxInitialWeight and 
+					   between minInitialWeight and maxInitialWeight and 
 									 initialize the connection input to 1.
 		 Version     : 1.2.0
-     Comments    : Setting the input to 1 is usefull because this guarantees 
-		               that on bias connections the input is allways equal to 1.
+	 Comments    : Setting the input to 1 is usefull because this guarantees 
+					   that on bias connections the input is allways equal to 1.
 		*/
 		Connection() {
 			input  = 1.0; 			
@@ -256,7 +257,7 @@ class Connection {
 		/**
 		 Method  : void InitializeWeight()
 		 Purpose : Initialize the connection weight to a random value
-		           between minInitialWeight and maxInitialWeight.
+				   between minInitialWeight and maxInitialWeight.
 		 Version : 1.1.0
 		*/
 		void InitializeWeight() {
@@ -265,26 +266,7 @@ class Connection {
 			weight = d * ((double) rand() / RAND_MAX) + minInitialWeight;
 		}
 
-		void Save(OutputFile & f, char * separator, bool saveAditionalVars) {
-			CString s;
-
-			s.Format(L"%1.15f", weight);
-			f.WriteString(s);
-
-			if (saveAditionalVars) {
-				f.WriteString(CA2T(separator));
-				s.Format(L"%1.15f", delta);
-				f.WriteString(s);
-
-				f.WriteString(separator);
-				s.Format(L"%1.15f", deltaWithoutLearningMomentum);
-				f.WriteString(s);
-
-				f.WriteString(separator);
-				s.Format(L"%1.15f", learningRate);
-				f.WriteString(s);
-			}
-		}
+		void Save(OutputFile & f, char * separator, bool saveAditionalVars);
 
 		bool Load(InputFile & f, bool loadAditionalVars);
 };

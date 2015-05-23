@@ -1,0 +1,1 @@
+Multiple Back-Propagation is an open source software application for training neural networks with the Back-Propagation and the Multiple Back-Propagation algorithms.
